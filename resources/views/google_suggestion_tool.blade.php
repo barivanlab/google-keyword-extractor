@@ -950,8 +950,8 @@
                             ${index + 1}
                         </span>
                         <div class="flex flex-col min-w-0">
-                            <div class="flex flex-wrap items-center gap-2 md:gap-3">
-                                <span class="text-sm md:text-sm font-bold text-slate-700 group-hover:text-primary transition-colors truncate tracking-tight">
+                            <div class="flex items-center gap-2 md:gap-3">
+                                <span class="text-sm md:text-sm font-bold text-slate-700 group-hover:text-primary transition-colors line-clamp-2 tracking-tight">
                                     ${item.keyword}
                                 </span>
                                 <div class="flex items-center gap-1.5 md:gap-2">
