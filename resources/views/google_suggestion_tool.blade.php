@@ -109,7 +109,7 @@
                 <!-- منوی تغییر زبان -->
                 <div class="relative group">
                     <button class="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 glass border border-slate-200 rounded-xl text-[10px] md:text-xs font-bold text-slate-700 hover:border-primary transition-all shadow-sm">
-                        <i class="fa-solid fa-language text-secondary text-sm"></i>
+                        <i class="fa-solid fa-globe text-blue-600"></i>
                         <span class="hidden xs:inline">{{ strtoupper(app()->getLocale()) }}</span>
                         <i class="fa-solid fa-chevron-down text-[8px] md:text-[10px] opacity-50"></i>
                     </button>
