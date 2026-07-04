@@ -110,7 +110,7 @@
                 <div class="relative group">
                     <button class="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 glass border border-slate-200 rounded-xl text-[10px] md:text-xs font-bold text-slate-700 hover:border-primary transition-all shadow-sm">
                         <i class="fa-solid fa-globe text-blue-600"></i>
-                        <span class="hidden xs:inline">{{ strtoupper(app()->getLocale()) }}</span>
+                        <span class="xs:inline">{{ strtoupper(app()->getLocale()) }}</span>
                         <i class="fa-solid fa-chevron-down text-[8px] md:text-[10px] opacity-50"></i>
                     </button>
                     <div class="absolute top-full {{ app()->getLocale() == 'en' ? 'right-0' : 'left-0' }} mt-2 w-32 md:w-36 glass border border-slate-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden transform origin-top scale-95 group-hover:scale-100">
