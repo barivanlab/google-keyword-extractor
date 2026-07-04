@@ -167,6 +167,17 @@
                         </button>
                     </div>
 
+                    <div class="bg-slate-50/50 rounded-[1.2rem] md:rounded-[2rem] p-4 md:p-6 border border-slate-100">
+                        <label for="negativeKeywordsInput" class="block text-[9px] md:text-[10px] font-black text-slate-700 uppercase tracking-widest mb-2 md:mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-ban text-rose-500"></i>
+                            {{ __('messages.negative_keywords_label') }}
+                        </label>
+                        <input type="text" id="negativeKeywordsInput"
+                            class="w-full px-4 md:px-5 py-3 md:py-4 bg-white border border-slate-200 rounded-[1.2rem] md:rounded-[1.5rem] text-xs md:text-sm font-bold focus:outline-none focus:border-rose-400 shadow-sm"
+                            placeholder="{{ __('messages.negative_keywords_placeholder') }}" autocomplete="off">
+                        <span class="text-[8px] md:text-[9px] text-slate-400 mt-1.5 md:mt-2 block font-medium">{{ __('messages.negative_keywords_desc') }}</span>
+                    </div>
+
                     <!-- انتخاب نوع جستجو و تنظیمات پیشرفته -->
                     <div class="bg-slate-50/50 rounded-[1.2rem] md:rounded-[2rem] p-1.5 md:p-2 border border-slate-100 flex flex-col sm:flex-row gap-1.5 md:gap-2">
                         <button type="button" onclick="setSearchType('normal')" id="typeBtnNormal" class="flex-grow flex items-center justify-center gap-2 py-3 md:py-4 px-4 md:px-6 rounded-[1rem] md:rounded-[1.5rem] font-bold text-xs md:text-sm transition-all bg-white shadow-sm border border-slate-200 text-slate-900 active-type">
@@ -509,6 +520,7 @@
         const searchForm = document.getElementById('searchForm');
         const keywordInput = document.getElementById('keywordInput');
         const clearBtn = document.getElementById('clearBtn');
+        const negativeKeywordsInput = document.getElementById('negativeKeywordsInput');
         const langSelect = document.getElementById('langSelect');
         const countrySelect = document.getElementById('countrySelect');
         const loadingState = document.getElementById('loadingState');
@@ -554,6 +566,7 @@
             phase2_label: "{{ __('messages.phase2_label', ['layer' => 'LAYER']) }}",
             layer_unit: "{{ __('messages.layer_unit', ['current' => 'CURRENT', 'total' => 'TOTAL']) }}",
             results_found: "{{ __('messages.results_found', ['count' => 'COUNT']) }}",
+            negative_keywords_label: "{{ __('messages.negative_keywords_label') }}",
             layer: "{{ __('messages.layer', ['value' => 'VALUE']) }}",
             repeats: "{{ __('messages.repeats', ['value' => 'VALUE']) }}",
             copy_word: "{{ __('messages.copy_word') }}",
@@ -619,6 +632,27 @@
         let currentSuggestions = [];
         let isBulkCancelled = false;
         let translationAbortController = null;
+
+        function getNegativeKeywords() {
+            return negativeKeywordsInput.value
+                .split(/[,;\n]+/)
+                .map(term => term.trim().toLowerCase())
+                .filter(Boolean);
+        }
+
+        function normalizeKeyword(keyword) {
+            return keyword
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, ' ');
+        }
+
+        function isExcludedKeyword(keyword, negativeTerms) {
+            if (!keyword || negativeTerms.length === 0) return false;
+
+            const normalizedKeyword = normalizeKeyword(keyword);
+            return negativeTerms.some(term => normalizedKeyword.includes(term));
+        }
 
         layersCount.addEventListener('input', (e) => {
             layersCountLabel.textContent = I18N.layers_unit.replace('VALUE', e.target.value);
@@ -729,6 +763,7 @@
             const searchType = document.querySelector('input[name="searchType"]:checked').value;
             const lang = langSelect.value;
             const country = countrySelect.value;
+            const negativeTerms = getNegativeKeywords();
 
             setButtonLoading(true);
 
@@ -750,11 +785,13 @@
                     const data = await fetchSingleSuggestion(baseKeyword, lang, country);
                     loadingState.classList.add('hidden');
                     
-                    const formattedNormalResults = data.map(item => ({
-                        keyword: item,
-                        count: 1,
-                        firstLayer: 1
-                    }));
+                    const formattedNormalResults = data
+                        .filter(item => !isExcludedKeyword(item, negativeTerms))
+                        .map(item => ({
+                            keyword: item,
+                            count: 1,
+                            firstLayer: 1
+                        }));
                     processAndDisplayResults(baseKeyword, formattedNormalResults, lang);
                 } catch (err) {
                     loadingState.classList.add('hidden');
@@ -779,6 +816,7 @@
             function registerKeyword(keyword, layer) {
                 const trimmed = keyword.trim();
                 if (!trimmed) return;
+                if (isExcludedKeyword(trimmed, negativeTerms)) return;
                 if (keywordRegistry.has(trimmed)) {
                     const entry = keywordRegistry.get(trimmed);
                     entry.count++;
@@ -870,7 +908,7 @@
                             const suggestions = await fetchSingleSuggestion(targetQuery, lang, country);
                             suggestions.forEach(item => {
                                 const trimmedItem = item.trim();
-                                if (trimmedItem) {
+                                if (trimmedItem && !isExcludedKeyword(trimmedItem, negativeTerms)) {
                                     if (!keywordRegistry.has(trimmedItem)) {
                                         newlyDiscoveredInThisLayer.push(trimmedItem);
                                     }
@@ -896,7 +934,7 @@
                     keyword: keyword,
                     count: meta.count,
                     firstLayer: meta.firstLayer
-                }));
+                })).filter(item => !isExcludedKeyword(item.keyword, negativeTerms));
 
                 finalResultsArray.sort((a, b) => {
                     if (b.count !== a.count) return b.count - a.count;
