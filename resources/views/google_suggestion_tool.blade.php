@@ -367,6 +367,31 @@
             </div>
         </div>
 
+        <!-- صفحه راهنمای اولیه کاربر -->
+        <div id="introState" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 my-6 md:my-10 animate-fade-in">
+            <div class="glass p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-soft text-center group hover:-translate-y-2 transition-all duration-300">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-primary/10 text-primary rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-2xl mx-auto mb-4 md:mb-6 shadow-inner group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                    <i class="fa-solid fa-arrows-split-up-and-left"></i>
+                </div>
+                <h3 class="font-black text-slate-900 mb-2 md:mb-3 text-xs md:text-sm uppercase tracking-tight">{{ __('messages.intro_title1') }}</h3>
+                <p class="text-[10px] md:text-xs text-slate-500 leading-relaxed font-medium">{{ __('messages.intro_desc1') }}</p>
+            </div>
+            <div class="glass p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-soft text-center group hover:-translate-y-2 transition-all duration-300">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-2xl mx-auto mb-4 md:mb-6 shadow-inner group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="font-black text-slate-900 mb-2 md:mb-3 text-xs md:text-sm uppercase tracking-tight">{{ __('messages.intro_title2') }}</h3>
+                <p class="text-[10px] md:text-xs text-slate-500 leading-relaxed font-medium">{{ __('messages.intro_desc2') }}</p>
+            </div>
+            <div class="glass p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-soft text-center group hover:-translate-y-2 transition-all duration-300">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-violet-50 text-violet-600 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-2xl mx-auto mb-4 md:mb-6 shadow-inner group-hover:bg-violet-500 group-hover:text-white transition-colors duration-300">
+                    <i class="fa-solid fa-file-export"></i>
+                </div>
+                <h3 class="font-black text-slate-900 mb-2 md:mb-3 text-xs md:text-sm uppercase tracking-tight">{{ __('messages.intro_title3') }}</h3>
+                <p class="text-[10px] md:text-xs text-slate-500 leading-relaxed font-medium">{{ __('messages.intro_desc3') }}</p>
+            </div>
+        </div>
+
         <!-- وضعیت نمایش خطا -->
         <div id="errorState" class="hidden glass bg-rose-50/50 border border-rose-100 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] my-6 md:my-10 animate-fade-in">
             <div class="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 text-center md:text-start">
