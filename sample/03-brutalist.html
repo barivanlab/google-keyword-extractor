@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>۰۳ — بلوک · استخراج‌گر کلمات کلیدی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bone:#EFEAE0;
+  --ink:#0D0D0D;
+  --orange:#FF4D00;
+  --blue:#2438FF;
+  --yellow:#FFD400;
+  --white:#FFFDF7;
+  --sans:'Vazirmatn',sans-serif;
+  --grot:'Space Grotesk','Vazirmatn',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bone);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.7;
+  background-image:linear-gradient(90deg,rgba(13,13,13,.055) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+::selection{background:var(--blue);color:var(--white)}
+a{color:inherit}
+button{font-family:inherit}
+
+/* ── تیکر ── */
+.ticker{
+  background:var(--ink);color:var(--bone);overflow:hidden;white-space:nowrap;
+  border-bottom:3px solid var(--ink);padding:9px 0;
+}
+.ticker__m{display:inline-block;animation:slide 26s linear infinite;font-family:var(--grot);font-size:13px;letter-spacing:.06em;font-weight:500}
+.ticker__m span{color:var(--orange)}
+.ticker__m i{font-style:normal;opacity:.4;margin:0 14px}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.ticker__m{animation:none}}
+
+/* ── هدر ── */
+.hdr{
+  border-bottom:3px solid var(--ink);background:var(--bone);
+  position:sticky;top:0;z-index:40;
+}
+.hdr__in{max-width:1200px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:11px;text-decoration:none}
+.logo__mark{
+  width:38px;height:38px;background:var(--orange);border:3px solid var(--ink);
+  display:grid;place-items:center;font-family:var(--grot);font-weight:700;font-size:19px;
+  box-shadow:4px 4px 0 var(--ink);
+}
+.logo__t{font-weight:900;font-size:19px;letter-spacing:-.02em;line-height:1.15}
+.logo__t small{display:block;font-family:var(--grot);font-size:9.5px;letter-spacing:.2em;font-weight:500;opacity:.55}
+.hdr__nav{margin-inline-start:auto;display:flex;gap:9px;flex-wrap:wrap}
+.chip{
+  font-family:var(--grot);font-size:12.5px;font-weight:700;letter-spacing:.05em;
+  border:2.5px solid var(--ink);background:var(--white);padding:7px 14px;
+  text-decoration:none;cursor:pointer;transition:.12s;box-shadow:3px 3px 0 var(--ink);
+}
+.chip:hover{background:var(--yellow)}
+.chip:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.chip:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.chip--on{background:var(--ink);color:var(--bone)}
+.chip--on:hover{background:var(--blue);color:var(--white)}
+
+/* ── هیرو ── */
+.hero{max-width:1200px;margin:0 auto;padding:56px 20px 34px}
+.hero__kick{
+  display:inline-block;font-family:var(--grot);font-size:12px;font-weight:700;letter-spacing:.18em;
+  background:var(--blue);color:var(--white);border:3px solid var(--ink);padding:6px 14px;
+  box-shadow:4px 4px 0 var(--ink);margin-bottom:26px;
+}
+.hero h1{
+  font-weight:900;font-size:clamp(42px,8.4vw,96px);line-height:.96;letter-spacing:-.035em;
+  max-width:14ch;
+}
+.hero h1 em{
+  font-style:normal;background:var(--orange);color:var(--white);
+  padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  border:3px solid var(--ink);
+}
+.hero__sub{
+  margin-top:26px;max-width:52ch;font-size:17px;font-weight:500;
+  border-inline-start:5px solid var(--ink);padding-inline-start:16px;
+}
+.hero__strip{display:flex;gap:0;margin-top:38px;flex-wrap:wrap;border:3px solid var(--ink);background:var(--white);box-shadow:7px 7px 0 var(--ink)}
+.hero__cell{flex:1;min-width:170px;padding:16px 18px;border-inline-start:3px solid var(--ink)}
+.hero__cell:first-child{border-inline-start:none}
+.hero__cell b{display:block;font-family:var(--grot);font-size:30px;font-weight:700;line-height:1.1}
+.hero__cell span{font-family:var(--grot);font-size:10.5px;letter-spacing:.14em;opacity:.55;font-weight:500}
+@media(max-width:640px){.hero__cell{min-width:50%;border-top:3px solid var(--ink)}.hero__cell:nth-child(-n+2){border-top:none}.hero__cell:nth-child(odd){border-inline-start:none}}
+
+/* ── فرم ── */
+.tool{max-width:1200px;margin:0 auto;padding:26px 20px 0}
+.panel{
+  border:3px solid var(--ink);background:var(--white);box-shadow:9px 9px 0 var(--ink);
+}
+.panel__hd{
+  background:var(--ink);color:var(--bone);padding:11px 18px;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  font-family:var(--grot);font-size:12.5px;font-weight:700;letter-spacing:.16em;
+}
+.panel__hd .dotrow{display:flex;gap:6px}
+.panel__hd .dotrow i{width:11px;height:11px;background:var(--bone);display:block;border:2px solid var(--bone)}
+.panel__hd .dotrow i:first-child{background:var(--orange);border-color:var(--orange)}
+.panel__bd{padding:26px 22px 28px}
+@media(min-width:860px){.panel__bd{padding:34px 32px 36px}}
+
+.grid{display:grid;gap:22px}
+@media(min-width:900px){.grid{grid-template-columns:1.35fr 1fr;gap:30px}}
+.f{display:flex;flex-direction:column;gap:8px}
+.f__l{
+  font-family:var(--grot);font-size:11.5px;font-weight:700;letter-spacing:.14em;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+}
+.f__l b{color:var(--orange)}
+.big{
+  font-family:var(--sans);font-size:22px;font-weight:700;color:var(--ink);
+  background:var(--bone);border:3px solid var(--ink);padding:15px 16px;width:100%;
+  box-shadow:inset 3px 3px 0 rgba(13,13,13,.07);transition:.12s;
+}
+.big::placeholder{color:#9a948a;font-weight:500;font-size:17px}
+.big:focus{outline:none;background:var(--white);box-shadow:6px 6px 0 var(--blue)}
+.sm{
+  font-family:var(--sans);font-size:16px;font-weight:500;background:var(--bone);
+  border:3px solid var(--ink);padding:12px 14px;width:100%;appearance:none;cursor:pointer;
+}
+.sm:focus{outline:none;background:var(--white);box-shadow:5px 5px 0 var(--blue)}
+select.sm{
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position:left 18px top 52%,left 12px top 52%;background-size:6px 6px;background-repeat:no-repeat;
+  padding-left:36px;
+}
+.help{font-size:13.5px;font-weight:500;opacity:.6;line-height:1.65}
+
+/* سوییچ بلوکی */
+.seg2{display:flex;gap:0;border:3px solid var(--ink);background:var(--bone)}
+.seg2 button{
+  flex:1;font-size:15.5px;font-weight:700;background:none;border:none;cursor:pointer;
+  padding:14px 8px;color:#8a847a;transition:.12s;position:relative;
+}
+.seg2 button+button{border-inline-start:3px solid var(--ink)}
+.seg2 button[aria-pressed=true]{background:var(--ink);color:var(--bone)}
+.seg2 button:hover:not([aria-pressed=true]){background:var(--yellow);color:var(--ink)}
+.seg2 button:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+
+/* شمارنده لایه */
+.counter{display:flex;gap:7px;flex-wrap:wrap}
+.counter button{
+  width:44px;height:44px;border:3px solid var(--ink);background:var(--bone);
+  font-family:var(--grot);font-size:16px;font-weight:700;cursor:pointer;transition:.1s;
+}
+.counter button.on{background:var(--orange);color:var(--white);box-shadow:3px 3px 0 var(--ink)}
+.counter button:hover:not(.on){background:var(--yellow)}
+.counter button:active{transform:translate(2px,2px);box-shadow:none}
+.counter button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+/* دکمه اصلی */
+.go{
+  width:100%;margin-top:26px;background:var(--orange);color:var(--white);
+  border:3px solid var(--ink);font-weight:900;font-size:20px;letter-spacing:-.01em;
+  padding:19px 20px;cursor:pointer;box-shadow:8px 8px 0 var(--ink);transition:.1s;
+  display:flex;align-items:center;justify-content:center;gap:14px;
+}
+.go:hover{background:var(--blue)}
+.go:active{transform:translate(8px,8px);box-shadow:0 0 0 var(--ink)}
+.go:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.go:disabled{background:#b7b1a6;cursor:progress}
+.go span.arw{font-family:var(--grot);font-weight:700}
+
+/* پیشرفت */
+.prog{display:none;margin-top:30px;border-top:3px solid var(--ink);padding-top:22px}
+.prog.on{display:block}
+.prog__t{display:flex;justify-content:space-between;font-family:var(--grot);font-size:12.5px;font-weight:700;letter-spacing:.1em;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.prog__bar{height:34px;border:3px solid var(--ink);background:var(--bone);position:relative;overflow:hidden}
+.prog__bar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--orange) 0 14px,#ff7a3d 14px 28px);width:0;transition:width .28s}
+.prog__bar b{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--grot);font-size:13px;font-weight:700;color:var(--ink);
+  mix-blend-mode:difference;filter:invert(1);letter-spacing:.08em;
+}
+.prog__q{font-family:var(--grot);font-size:14px;margin-top:14px;background:var(--ink);color:var(--bone);padding:10px 14px;direction:rtl;text-align:right}
+
+/* ── نتایج ── */
+.res{display:none;padding:74px 0 0}
+.res.on{display:block}
+.res__wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.res__hd{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:flex-end;margin-bottom:28px}
+.res__hd h2{font-weight:900;font-size:clamp(34px,6vw,64px);line-height:1;letter-spacing:-.03em}
+.res__hd h2 i{font-style:normal;color:var(--orange)}
+.res__acts{display:flex;gap:12px;flex-wrap:wrap}
+
+.blocks{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.kblock{
+  border:3px solid var(--ink);background:var(--white);padding:16px 16px 14px;
+  box-shadow:6px 6px 0 var(--ink);position:relative;cursor:pointer;transition:.12s;
+  display:flex;flex-direction:column;gap:10px;min-height:132px;
+}
+.kblock:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--ink);background:var(--yellow)}
+.kblock:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.kblock:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.kblock__n{
+  position:absolute;top:-3px;left:-3px;background:var(--ink);color:var(--bone);
+  font-family:var(--grot);font-weight:700;font-size:13px;padding:4px 10px;letter-spacing:.06em;
+}
+.kblock__kw{font-size:18px;font-weight:700;line-height:1.5;margin-top:22px;letter-spacing:-.01em}
+.kblock__kw mark{background:var(--orange);color:var(--white);padding:0 3px}
+.kblock__ft{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{
+  font-family:var(--grot);font-size:11px;font-weight:700;letter-spacing:.08em;
+  border:2.5px solid var(--ink);padding:3px 9px;background:var(--bone);
+}
+.badge--hot{background:var(--orange);color:var(--white)}
+.badge--l{background:var(--blue);color:var(--white)}
+
+/* آمار */
+.stats{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:34px}
+.sbox{border:3px solid var(--ink);background:var(--white);padding:20px 18px;box-shadow:6px 6px 0 var(--ink)}
+.sbox:nth-child(2){background:var(--yellow)}
+.sbox:nth-child(3){background:var(--blue);color:var(--white)}
+.sbox:nth-child(3) .sbox__k{color:rgba(255,255,255,.7)}
+.sbox__k{font-family:var(--grot);font-size:11px;font-weight:700;letter-spacing:.14em;opacity:.6}
+.sbox__v{font-family:var(--grot);font-size:54px;font-weight:700;line-height:1.05;letter-spacing:-.03em}
+
+/* ── راهنما ── */
+.how{max-width:1200px;margin:0 auto;padding:80px 20px 0}
+.how h2{font-weight:900;font-size:clamp(28px,4.6vw,44px);letter-spacing:-.03em;margin-bottom:26px}
+.how__g{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.hcard{border:3px solid var(--ink);background:var(--white);padding:24px 20px;box-shadow:6px 6px 0 var(--ink);position:relative}
+.hcard:nth-child(1){border-top:10px solid var(--orange)}
+.hcard:nth-child(2){border-top:10px solid var(--blue)}
+.hcard:nth-child(3){border-top:10px solid var(--yellow)}
+.hcard b{display:block;font-family:var(--grot);font-size:13px;letter-spacing:.16em;margin-bottom:10px;opacity:.5}
+.hcard h3{font-size:20px;font-weight:900;margin-bottom:8px;letter-spacing:-.02em}
+.hcard p{font-size:14.5px;line-height:1.8;opacity:.72}
+
+/* ── فوتر ── */
+footer{margin-top:80px;background:var(--ink);color:var(--bone);border-top:3px solid var(--ink)}
+.foot{max-width:1200px;margin:0 auto;padding:44px 20px 50px;display:flex;flex-wrap:wrap;gap:26px;justify-content:space-between;align-items:flex-start}
+.foot__logo{font-weight:900;font-size:26px;letter-spacing:-.03em}
+.foot__logo span{color:var(--orange)}
+.foot__meta{font-family:var(--grot);font-size:12.5px;letter-spacing:.08em;opacity:.6;line-height:2.2}
+.foot__meta a{color:var(--orange);text-decoration:none}
+.foot__meta a:hover{text-decoration:underline}
+.foot__langs{display:flex;gap:9px}
+.foot__langs a{
+  font-family:var(--grot);font-size:13px;font-weight:700;text-decoration:none;
+  border:2.5px solid var(--bone);padding:6px 14px;transition:.12s;
+}
+.foot__langs a:hover{background:var(--orange);border-color:var(--orange)}
+
+/* توست */
+.toast{
+  position:fixed;bottom:26px;right:26px;z-index:100;background:var(--ink);color:var(--bone);
+  border:3px solid var(--ink);box-shadow:6px 6px 0 var(--orange);
+  font-weight:700;font-size:15px;padding:14px 22px;transform:translateY(160%);
+  transition:.28s cubic-bezier(.2,.8,.2,1);
+}
+.toast.on{transform:translateY(0)}
+@media(max-width:600px){.toast{left:16px;right:16px;text-align:center}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__m">
+    لپ‌تاپ دل <i>◆</i> لپ‌تاپ گیمینگ <i>◆</i> <span>قیمت لپ‌تاپ</span> <i>◆</i> لپ‌تاپ دانشجویی <i>◆</i> لپ‌تاپ استوک <i>◆</i> <span>بهترین لپ‌تاپ ۱۴۰۵</span> <i>◆</i> لپ‌تاپ مناسب برنامه‌نویسی <i>◆</i> خرید اقساطی لپ‌تاپ <i>◆</i> لپ‌تاپ زیر ۱۵ میلیون <i>◆</i>
+    لپ‌تاپ دل <i>◆</i> لپ‌تاپ گیمینگ <i>◆</i> <span>قیمت لپ‌تاپ</span> <i>◆</i> لپ‌تاپ دانشجویی <i>◆</i> لپ‌تاپ استوک <i>◆</i> <span>بهترین لپ‌تاپ ۱۴۰۵</span> <i>◆</i> لپ‌تاپ مناسب برنامه‌نویسی <i>◆</i> خرید اقساطی لپ‌تاپ <i>◆</i> لپ‌تاپ زیر ۱۵ میلیون <i>◆</i>
+  </div>
+</div>
+
+<header class="hdr">
+  <div class="hdr__in">
+    <a class="logo" href="#">
+      <span class="logo__mark">K</span>
+      <span class="logo__t">استخراج‌گر کلیدواژه<small>GOOGLE SUGGEST HARVESTER</small></span>
+    </a>
+    <nav class="hdr__nav">
+      <a class="chip chip--on" href="#tool">ابزار</a>
+      <a class="chip" href="#how">روش</a>
+      <a class="chip" href="?lang=en">EN</a>
+      <a class="chip" href="?lang=fa">FA</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <span class="hero__kick">۱۰ لایه · ۲۴ زبان · بلادرنگ</span>
+    <h1>یک واژه را <em>تجزیه</em> کن تا صد پرسش پیدا شود.</h1>
+    <p class="hero__sub">الگوریتم، واژهٔ شما را با الفبای زبان مقصد می‌آمیزد و پیشنهادهای زندهٔ گوگل را لایه‌به‌لایه تا ده پله جلو می‌برد. بدون حساب، بدون سرور — مستقیم در مرورگر.</p>
+
+    <div class="hero__strip">
+      <div class="hero__cell"><b>۱۰</b><span>MAX LAYERS</span></div>
+      <div class="hero__cell"><b>۲۴</b><span>LANGUAGES</span></div>
+      <div class="hero__cell"><b>۰</b><span>SERVER CALLS</span></div>
+      <div class="hero__cell"><b>۱۰۰٪</b><span>CLIENT-SIDE</span></div>
+    </div>
+  </section>
+
+  <section class="tool" id="tool">
+    <div class="panel">
+      <div class="panel__hd">
+        <span>استخراج‌گر / کنسول تنظیمات</span>
+        <span class="dotrow"><i></i><i></i><i></i></span>
+      </div>
+      <div class="panel__bd">
+        <div class="grid">
+          <div style="display:flex;flex-direction:column;gap:22px">
+            <div class="f">
+              <label class="f__l" for="seed">واژهٔ کلیدی اصلی <b>الزامی</b></label>
+              <input class="big" id="seed" type="text" value="لپ‌تاپ" placeholder="مثلاً: لپ‌تاپ …" autocomplete="off">
+            </div>
+
+            <div class="f">
+              <span class="f__l">نوع پویش</span>
+              <div class="seg2" role="group" aria-label="نوع پویش">
+                <button type="button" id="sFlat" aria-pressed="false" onclick="setMode(false)">تک‌لایه</button>
+                <button type="button" id="sDeep" aria-pressed="true" onclick="setMode(true)">چندلایه عمیق</button>
+              </div>
+            </div>
+
+            <div class="f" id="layerBox">
+              <span class="f__l">تعداد لایه‌ها <b id="layerOut">۴</b></span>
+              <div class="counter" id="counter" role="group" aria-label="تعداد لایه"></div>
+            </div>
+
+            <div class="f">
+              <label class="f__l" for="neg">کلمات حذف‌شونده</label>
+              <input class="sm" id="neg" type="text" placeholder="تعمیر، دسته‌دوم …" autocomplete="off">
+              <span class="help">هر پیشنهادی که این واژه‌ها را داشته باشد، کنار می‌رود.</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:22px">
+            <div class="f">
+              <label class="f__l" for="lang">زبان پویش</label>
+              <select class="sm" id="lang">
+                <option value="fa" selected>فارسی — fa</option>
+                <option value="en">English — en</option>
+                <option value="ar">العربية — ar</option>
+                <option value="tr">Türkçe — tr</option>
+                <option value="de">Deutsch — de</option>
+              </select>
+            </div>
+            <div class="f">
+              <label class="f__l" for="country">منطقهٔ هدف</label>
+              <select class="sm" id="country">
+                <option value="ir" selected>ایران — ir</option>
+                <option value="us">United States — us</option>
+                <option value="ae">امارات — ae</option>
+                <option value="tr">Türkiye — tr</option>
+                <option value="de">Germany — de</option>
+              </select>
+            </div>
+            <div class="f">
+              <label class="f__l" for="delay">مکث میان درخواست‌ها (ms)</label>
+              <input class="sm" id="delay" type="text" value="250" inputmode="numeric">
+              <span class="help">برای پایداری کمتر از ۲۵۰ms توصیه نمی‌شود.</span>
+            </div>
+            <div class="f">
+              <label class="f__l" for="seeds">بیشینه بذر برای لایهٔ بعد</label>
+              <input class="sm" id="seeds" type="text" value="25" inputmode="numeric">
+              <span class="help">کنترل ترافیک؛ پرتکرارترین‌ها به لایهٔ بعد می‌روند.</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="go" id="goBtn" onclick="run()">
+          <span>شروع استخراج</span><span class="arw">←</span>
+        </button>
+
+        <div class="prog" id="prog" aria-live="polite">
+          <div class="prog__t">
+            <span id="pPhase">فاز ۱ — پویش الفبایی لایهٔ ۱</span>
+            <span id="pCount">۰ / ۰ درخواست</span>
+          </div>
+          <div class="prog__bar"><i id="pFill"></i><b id="pPct">۰٪</b></div>
+          <div class="prog__q" id="pQuery">در انتظار شروع…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="res" id="res">
+    <div class="res__wrap">
+      <div class="res__hd">
+        <h2><i id="resN">۰</i> کلیدواژه<br>کشف‌شده</h2>
+        <div class="res__acts">
+          <button class="chip" onclick="copyAll()">کپی همه</button>
+          <button class="chip chip--on" onclick="toast('فایل TXT دانلود شد')">دانلود TXT</button>
+        </div>
+      </div>
+
+      <div class="blocks" id="blocks"></div>
+
+      <div class="stats">
+        <div class="sbox"><div class="sbox__k">کوتاه · ۱ تا ۲ واژه</div><div class="sbox__v" id="stS">۰</div></div>
+        <div class="sbox"><div class="sbox__k">دنباله‌بلند</div><div class="sbox__v" id="stL">۰</div></div>
+        <div class="sbox"><div class="sbox__k">عمق نهایی</div><div class="sbox__v" id="stD">۰</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <h2>روش کار، سه قدم.</h2>
+    <div class="how__g">
+      <div class="hcard">
+        <b>۰۱</b>
+        <h3>ترکیب با الفبا</h3>
+        <p>واژهٔ شما با هر حرف زبان مقصد سوار و سوار می‌شود تا دامنهٔ اولیهٔ پیشنهادها ساخته شود.</p>
+      </div>
+      <div class="hcard">
+        <b>۰۲</b>
+        <h3>باز کردن لایه‌ها</h3>
+        <p>هر پیشنهاد تازه، خود به بذر لایهٔ بعد بدل می‌شود. تا ده پله، با مکث کنترل‌شده میان درخواست‌ها.</p>
+      </div>
+      <div class="hcard">
+        <b>۰۳</b>
+        <h3>پالایش و رتبه‌بندی</h3>
+        <p>تکرارها حذف، کلمات منفی فیلتر و خروجی بر پایهٔ بسامد و عمق مرتب می‌شود.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <div>
+      <div class="foot__logo">کلیدواژه<span>.</span></div>
+      <div class="foot__meta" style="margin-top:12px">
+        ساختهٔ <a href="https://zarwan.co" target="_blank" rel="noopener">Zarwan</a><br>
+        پیشنهادها متعلق به Google LLC است
+      </div>
+    </div>
+    <div class="foot__langs">
+      <a href="?lang=fa">فارسی</a>
+      <a href="?lang=en">English</a>
+      <a href="?lang=ar">العربية</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const DATA=[
+ ["لپ‌تاپ دل",1,5],["لپ‌تاپ ایسوس",1,4],["لپ‌تاپ گیمینگ",1,4],
+ ["لپ‌تاپ دانشجویی",1,3],["قیمت لپ‌تاپ",1,3],["لپ‌تاپ اپل",1,3],
+ ["لپ‌تاپ استوک",2,3],["لپ‌تاپ ایسر",2,2],["لپ‌تاپ تا ۲۰ میلیون",2,2],
+ ["بهترین لپ‌تاپ ۱۴۰۵",2,2],["لپ‌تاپ لنوو",2,2],["لپ‌تاپ مناسب برنامه‌نویسی",3,2],
+ ["خرید اقساطی لپ‌تاپ",3,2],["مقایسه لپ‌تاپ ایسوس و دل",3,1],["لپ‌تاپ سبک برای دانشجو",3,1],
+ ["لپ‌تاپ مک‌بوک ایر",4,2],["تعمیر لپ‌تاپ در تهران",4,1],["گارانتی لپ‌تاپ اصل",4,1],
+ ["لپ‌تاپ زیر ۱۵ میلیون",4,1],["لپ‌تاپ مناسب طراحی",4,1]
+];
+const FA=n=>String(n).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
+const $=id=>document.getElementById(id);
+let deep=true,layer=4,timer=null;
+
+function setMode(d){
+  deep=d;
+  $('sDeep').setAttribute('aria-pressed',d);
+  $('sFlat').setAttribute('aria-pressed',!d);
+  $('layerBox').style.opacity=d?'1':'.35';
+  $('counter').style.pointerEvents=d?'auto':'none';
+}
+function drawCounter(){
+  const c=$('counter');c.innerHTML='';
+  for(let i=2;i<=10;i++){
+    const b=document.createElement('button');
+    b.type='button';b.textContent=i;
+    if(i<=layer)b.className='on';
+    b.setAttribute('aria-label',i+' لایه');
+    b.onclick=()=>{layer=i;drawCounter()};
+    c.appendChild(b);
+  }
+  $('layerOut').textContent=FA(layer);
+}
+drawCounter();setMode(true);
+
+function run(){
+  if(timer)clearInterval(timer);
+  const seed=$('seed').value.trim()||'لپ‌تاپ';
+  const maxL=deep?layer:1;
+  const total=maxL*42;
+  let cur=0;
+  $('prog').classList.add('on');
+  $('res').classList.remove('on');
+  $('goBtn').disabled=true;
+  $('pFill').style.width='0%';
+  timer=setInterval(()=>{
+    cur=Math.min(total,cur+Math.ceil(total/22));
+    const pct=Math.round(cur/total*100);
+    const L=Math.min(maxL,Math.floor(cur/total*maxL)+1);
+    $('pFill').style.width=pct+'%';
+    $('pPct').textContent=FA(pct)+'٪';
+    $('pPhase').textContent = L===1 ? 'فاز ۱ — پویش الفبایی لایهٔ ۱' : 'فاز ۲ — پویش مستقیم لایهٔ '+FA(L);
+    $('pCount').textContent=FA(cur)+' / '+FA(total)+' درخواست';
+    $('pQuery').textContent='› '+seed+' '+FA(L);
+    if(cur>=total){
+      clearInterval(timer);timer=null;
+      $('goBtn').disabled=false;
+      setTimeout(render,300);
+    }
+  },85);
+}
+
+function render(){
+  const maxL=deep?layer:1;
+  const list=DATA.filter(d=>d[1]<=maxL);
+  const seed=($('seed').value.trim()||'لپ‌تاپ');
+  $('resN').textContent=FA(list.length);
+  const box=$('blocks');box.innerHTML='';
+  list.forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='kblock';el.tabIndex=0;
+    el.onclick=()=>window.open('https://www.google.com/search?q='+encodeURIComponent(d[0]),'_blank');
+    el.onkeydown=e=>{if(e.key==='Enter')el.click()};
+    const kw=d[0].replace(seed,`<mark>${seed}</mark>`);
+    el.innerHTML=`<span class="kblock__n">${String(i+1).padStart(2,'0')}</span>
+      <div class="kblock__kw">${kw}</div>
+      <div class="kblock__ft">
+        ${d[2]>1?`<span class="badge badge--hot">×${FA(d[2])} تکرار</span>`:''}
+        <span class="badge badge--l">لایه ${FA(d[1])}</span>
+      </div>`;
+    box.appendChild(el);
+  });
+  const long=list.filter(d=>d[0].split(' ').length>2).length;
+  $('stS').textContent=FA(list.length-long);
+  $('stL').textContent=FA(long);
+  $('stD').textContent=FA(maxL);
+  $('res').classList.add('on');
+  $('res').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function copyAll(){navigator.clipboard.writeText(DATA.map(d=>d[0]).join('\n')).then(()=>toast('۲۰ کلیدواژه کپی شد ✓'))}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2400)}
+$('seed').addEventListener('keydown',e=>{if(e.key==='Enter')run()});
+</script>
+</body>
+</html>

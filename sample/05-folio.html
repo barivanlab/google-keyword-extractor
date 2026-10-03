@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>۰۵ — حاشیه · استخراج‌گر کلمات کلیدی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ivory:#FBF8F2;
+  --ivory-2:#F4EFE6;
+  --espresso:#2B2521;
+  --muted:#7C736A;
+  --hair:#D9D1C4;
+  --clay:#B5654A;
+  --sage:#6E7F6B;
+  --gold:#A98B4F;
+  --serif:'Markazi Text','Fraunces',serif;
+  --lat:'Fraunces',serif;
+  --sans:'Vazirmatn',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ivory);color:var(--espresso);font-family:var(--sans);
+  font-size:16.5px;line-height:1.9;font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.4;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+}
+::selection{background:var(--clay);color:var(--ivory)}
+a{color:inherit}
+.shell{max-width:1240px;margin:0 auto;padding:0 26px}
+
+/* ── سردر ── */
+.top{
+  display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;
+  padding:30px 0 20px;border-bottom:1px solid var(--hair);
+}
+.brand{display:flex;align-items:center;gap:13px;text-decoration:none}
+.brand__mk{
+  width:34px;height:34px;border:1px solid var(--espresso);border-radius:50%;
+  display:grid;place-items:center;font-family:var(--serif);font-size:19px;font-weight:600;
+}
+.brand__t{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1}
+.brand__t small{
+  display:block;font-family:var(--lat);font-size:9.5px;letter-spacing:.3em;
+  color:var(--muted);font-weight:400;font-style:italic;margin-top:3px;
+}
+.menu{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.menu a{
+  font-size:14.5px;text-decoration:none;color:var(--muted);position:relative;padding-bottom:3px;
+  transition:color .2s;
+}
+.menu a::after{
+  content:"";position:absolute;bottom:0;right:0;width:0;height:1px;background:var(--clay);transition:width .28s ease;
+}
+.menu a:hover{color:var(--espresso)}
+.menu a:hover::after{width:100%}
+.menu a:focus-visible{outline:1.5px solid var(--clay);outline-offset:4px}
+.menu .sep{width:1px;height:16px;background:var(--hair)}
+
+/* ── چیدمان حاشیه‌دار ── */
+.page{display:grid;gap:0;padding-top:16px}
+@media(min-width:1000px){
+  .page{grid-template-columns:minmax(0,1fr) 268px;gap:64px}
+}
+.col-main{min-width:0}
+
+/* ── تیتر ── */
+.mast{padding:66px 0 40px}
+.eyebrow{
+  font-family:var(--lat);font-style:italic;font-size:14px;color:var(--clay);
+  letter-spacing:.04em;margin-bottom:22px;display:flex;align-items:center;gap:14px;
+}
+.eyebrow::before{content:"";width:38px;height:1px;background:var(--clay)}
+.mast h1{
+  font-family:var(--serif);font-weight:600;font-size:clamp(46px,8vw,88px);
+  line-height:1.06;letter-spacing:-.01em;max-width:15ch;
+}
+.mast h1 .mark{
+  position:relative;display:inline-block;color:var(--clay);
+}
+.mast h1 .mark svg{position:absolute;left:0;right:0;bottom:-.06em;width:100%;height:.28em;overflow:visible}
+.mast h1 .mark svg path{stroke:var(--clay);stroke-width:3.4;fill:none;stroke-linecap:round;
+  stroke-dasharray:340;stroke-dashoffset:340;animation:draw 1.2s .35s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.lede{
+  margin-top:30px;max-width:56ch;font-size:18.5px;line-height:2.05;color:#4A443E;font-weight:300;
+}
+.lede b{font-weight:600;color:var(--espresso)}
+
+/* ── فرم ── */
+.compose{
+  margin-top:26px;border-top:1px solid var(--espresso);padding-top:34px;
+}
+.compose__t{
+  font-family:var(--lat);font-size:11.5px;letter-spacing:.3em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:26px;font-weight:500;
+}
+.fields{display:grid;gap:26px}
+@media(min-width:820px){.fields{grid-template-columns:1.3fr 1fr;gap:34px 40px}}
+.f{display:flex;flex-direction:column;gap:9px}
+.f--full{grid-column:1/-1}
+.f__l{
+  font-size:13.5px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;
+  align-items:baseline;font-weight:500;
+}
+.f__l em{font-style:normal;font-family:var(--lat);font-size:11.5px;letter-spacing:.14em;color:var(--gold)}
+.inp{
+  font-family:var(--sans);font-size:18px;font-weight:500;color:var(--espresso);
+  background:transparent;border:none;border-bottom:1px solid var(--hair);
+  padding:10px 2px 12px;border-radius:0;transition:.22s;width:100%;
+}
+.inp::placeholder{color:#B3AA9E;font-weight:300}
+.inp:focus{outline:none;border-bottom-color:var(--clay);background:linear-gradient(transparent 60%,rgba(181,101,74,.07))}
+.inp:focus-visible{outline:1.5px solid var(--clay);outline-offset:5px}
+select.inp{
+  appearance:none;cursor:pointer;font-size:16px;padding-left:26px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:left 6px top 58%,left 1px top 58%;background-size:5px 5px;background-repeat:no-repeat;
+}
+.f__h{font-size:13px;color:var(--muted);line-height:1.75;font-weight:300}
+
+/* نوع پویش: دو واژهٔ زیرخط‌دار */
+.modes{display:flex;gap:28px;border-bottom:1px solid var(--hair);padding-bottom:2px}
+.modes button{
+  background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:16px;
+  color:var(--muted);padding:8px 0 11px;font-weight:500;position:relative;transition:.2s;
+}
+.modes button::after{content:"";position:absolute;bottom:-1px;right:0;width:0;height:2px;background:var(--clay);transition:.26s}
+.modes button[aria-pressed=true]{color:var(--espresso);font-weight:600}
+.modes button[aria-pressed=true]::after{width:100%}
+.modes button:hover{color:var(--espresso)}
+.modes button:focus-visible{outline:1.5px solid var(--clay);outline-offset:4px}
+
+/* اسلایدر لایه */
+.depth{display:flex;align-items:center;gap:16px}
+.depth input[type=range]{flex:1;appearance:none;background:transparent;height:24px;cursor:pointer}
+.depth input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--hair)}
+.depth input[type=range]::-webkit-slider-thumb{
+  appearance:none;width:17px;height:17px;border-radius:50%;background:var(--ivory);
+  border:1.5px solid var(--clay);margin-top:-8px;box-shadow:0 0 0 3px rgba(181,101,74,.14);transition:.15s;
+}
+.depth input[type=range]::-webkit-slider-thumb:hover{background:var(--clay)}
+.depth input[type=range]::-moz-range-track{height:1px;background:var(--hair)}
+.depth input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ivory);border:1.5px solid var(--clay)}
+.depth input[type=range]:focus-visible{outline:1.5px solid var(--clay);outline-offset:5px}
+.depth__v{
+  font-family:var(--lat);font-size:26px;font-weight:400;color:var(--clay);
+  min-width:44px;text-align:center;font-variant-numeric:tabular-nums;
+}
+
+.actions{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-top:38px}
+.btn{
+  font-family:var(--sans);font-size:15.5px;font-weight:600;cursor:pointer;
+  background:var(--espresso);color:var(--ivory);border:1px solid var(--espresso);
+  padding:15px 40px;border-radius:40px;transition:.22s;letter-spacing:.01em;
+}
+.btn:hover{background:var(--clay);border-color:var(--clay);box-shadow:0 8px 22px -12px rgba(181,101,74,.9)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--clay);outline-offset:4px}
+.btn--o{background:transparent;color:var(--espresso)}
+.btn--o:hover{background:var(--espresso);color:var(--ivory);box-shadow:none}
+.btn--s{padding:11px 24px;font-size:14px}
+.actions .fine{font-family:var(--lat);font-style:italic;font-size:13.5px;color:var(--muted)}
+
+/* ── پیشرفت ── */
+.flow{display:none;margin-top:44px;padding:26px 0 4px;border-top:1px solid var(--hair)}
+.flow.on{display:block}
+.flow__l{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);gap:14px;flex-wrap:wrap}
+.flow__l b{color:var(--espresso);font-weight:600}
+.flow__track{height:3px;background:var(--ivory-2);margin-top:14px;position:relative;overflow:hidden;border-radius:2px}
+.flow__track i{position:absolute;inset-inline-start:0;top:0;height:100%;width:0;background:var(--clay);transition:width .3s}
+.flow__q{
+  font-family:var(--serif);font-size:21px;color:var(--espresso);margin-top:16px;font-weight:500;
+}
+.flow__q span{color:var(--muted);font-size:15px;font-family:var(--sans)}
+
+/* ── حاشیه (کنار ستون) ── */
+.margin{display:none}
+@media(min-width:1000px){
+  .margin{display:block;padding-top:78px;position:sticky;top:30px;align-self:start}
+}
+.mnote{
+  font-size:13.5px;line-height:1.95;color:var(--muted);font-weight:300;
+  padding-inline-start:16px;border-inline-start:1px solid var(--hair);margin-bottom:30px;
+}
+.mnote b{
+  display:block;font-family:var(--lat);font-size:10.5px;letter-spacing:.22em;
+  color:var(--gold);text-transform:uppercase;font-weight:600;margin-bottom:8px;font-style:normal;
+}
+.mnote .num{font-family:var(--lat);font-size:38px;color:var(--clay);line-height:1;font-weight:300;display:block;margin-bottom:6px}
+.mnote i{font-style:italic;color:var(--espresso)}
+
+/* ── نتایج ── */
+.res{display:none;padding-top:76px}
+.res.on{display:block}
+.res__hd{border-top:1px solid var(--espresso);padding-top:26px;display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:flex-end}
+.res__hd h2{font-family:var(--serif);font-size:clamp(34px,5.4vw,54px);font-weight:600;line-height:1.1}
+.res__hd h2 span{color:var(--clay)}
+.res__acts{display:flex;gap:12px;flex-wrap:wrap}
+
+/* ابر واژگان */
+.cloud{
+  display:flex;flex-wrap:wrap;gap:10px 12px;margin-top:34px;
+  align-items:baseline;
+}
+.chip{
+  display:inline-flex;align-items:baseline;gap:9px;cursor:pointer;
+  border:1px solid var(--hair);background:rgba(255,255,255,.55);
+  padding:9px 17px;border-radius:30px;transition:.2s;text-decoration:none;color:inherit;
+  position:relative;
+}
+.chip:hover{border-color:var(--clay);background:#fff;transform:translateY(-2px);box-shadow:0 8px 18px -12px rgba(43,37,33,.5)}
+.chip:focus-visible{outline:1.5px solid var(--clay);outline-offset:3px}
+.chip__t{font-weight:500;line-height:1.5}
+.chip__t mark{background:linear-gradient(transparent 62%,rgba(181,101,74,.28) 0);color:inherit;padding:0 1px}
+.chip__c{font-family:var(--lat);font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums}
+.chip__l{font-family:var(--lat);font-size:10px;letter-spacing:.1em;color:var(--muted);opacity:.75}
+/* اندازه بر پایهٔ بسامد */
+.sz3 .chip__t{font-size:21px;font-weight:600}
+.sz2 .chip__t{font-size:17.5px}
+.sz1 .chip__t{font-size:15.5px;color:#544D47}
+.sz3{padding:12px 21px;background:#fff;border-color:#C9BFB0}
+
+/* آمار به شیوهٔ فهرست کتاب */
+.figures{margin-top:56px;border-top:1px solid var(--hair)}
+.fig{
+  display:flex;align-items:baseline;gap:18px;padding:17px 0;border-bottom:1px solid var(--hair);
+}
+.fig__k{font-size:15.5px;color:#544D47;flex-shrink:0}
+.fig__d{flex:1;height:1px;background-image:radial-gradient(circle,var(--hair) .9px,transparent .9px);background-size:6px 1px;align-self:center;opacity:.9}
+.fig__v{font-family:var(--lat);font-size:34px;font-weight:300;color:var(--espresso);line-height:1;font-variant-numeric:tabular-nums;flex-shrink:0}
+.fig--c .fig__v{color:var(--clay)}
+.fig--s .fig__v{color:var(--sage)}
+
+.pull{
+  margin-top:48px;padding:30px 0 30px 0;border-block:1px solid var(--hair);
+  font-family:var(--serif);font-size:clamp(24px,3.4vw,32px);line-height:1.65;color:var(--espresso);
+  font-weight:500;position:relative;
+}
+.pull::before{
+  content:"※";position:absolute;top:24px;inset-inline-end:-6px;color:var(--gold);
+  font-size:15px;font-family:var(--sans);
+}
+.pull em{color:var(--clay);font-style:normal}
+
+/* ── راهنما ── */
+.how{padding-top:88px}
+.how h2{font-family:var(--serif);font-size:clamp(30px,4.4vw,44px);font-weight:600;margin-bottom:8px}
+.how__sub{font-family:var(--lat);font-style:italic;color:var(--muted);font-size:15px;margin-bottom:34px}
+.steps{display:grid;gap:0;border-top:1px solid var(--hair)}
+.step{display:grid;gap:8px;padding:26px 0;border-bottom:1px solid var(--hair)}
+@media(min-width:760px){.step{grid-template-columns:76px 1fr 1.4fr;gap:34px;align-items:start}}
+.step__n{font-family:var(--lat);font-size:30px;color:var(--gold);line-height:1;font-weight:300}
+.step h3{font-family:var(--serif);font-size:25px;font-weight:600;line-height:1.3}
+.step p{font-size:15.5px;color:#5A534C;line-height:2;font-weight:300}
+
+/* ── فوتر ── */
+footer{margin-top:96px;border-top:1px solid var(--espresso);padding:34px 0 60px}
+.foot{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:baseline;font-size:14px;color:var(--muted)}
+.foot a{color:var(--espresso);text-decoration:none;border-bottom:1px solid var(--hair)}
+.foot a:hover{border-color:var(--clay);color:var(--clay)}
+.foot__langs{display:flex;gap:18px;font-family:var(--lat);font-size:13px;letter-spacing:.1em}
+
+.toast{
+  position:fixed;bottom:26px;right:26px;z-index:100;background:var(--espresso);color:var(--ivory);
+  font-size:14.5px;padding:14px 24px;border-radius:40px;box-shadow:0 16px 40px -18px rgba(43,37,33,.9);
+  transform:translateY(160%);transition:.34s cubic-bezier(.2,.8,.2,1);
+}
+.toast.on{transform:translateY(0)}
+@media(max-width:600px){.toast{left:16px;right:16px;text-align:center}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <a class="brand" href="#">
+      <span class="brand__mk">ح</span>
+      <span class="brand__t">حاشیه<small>MARGINALIA · KEYWORD RESEARCH</small></span>
+    </a>
+    <nav class="menu">
+      <a href="#compose">نگارش جست‌وجو</a>
+      <a href="#results">برگهٔ نتایج</a>
+      <a href="#how">روش</a>
+      <span class="sep"></span>
+      <a href="?lang=en">EN</a>
+      <a href="?lang=ar">AR</a>
+    </nav>
+  </header>
+
+  <div class="page">
+    <div class="col-main">
+      <section class="mast">
+        <div class="eyebrow">پژوهش واژگان، لایه‌به‌لایه</div>
+        <h1>بنویسید تا <span class="mark">پیدا شود<svg viewBox="0 0 300 20" preserveAspectRatio="none"><path d="M4 13 C 70 4, 150 18, 296 7"/></svg></span>.</h1>
+        <p class="lede">
+          واژهٔ شما آغازِ ماجراست. سامانه آن را با الفبای زبان مقصد می‌آمیزد، پیشنهادهای زندهٔ گوگل را
+          لایه‌به‌لایه تا ده پله پیش می‌برد، و آنچه را که <b>مردم واقعاً جست‌وجو می‌کنند</b> در برگه‌ای پاکیزه کنار هم می‌چیند.
+        </p>
+      </section>
+
+      <section class="compose" id="compose">
+        <div class="compose__t">نگارش جست‌وجو — Compose a query</div>
+
+        <div class="fields">
+          <div class="f">
+            <label class="f__l" for="seed">واژهٔ کلیدی اصلی <em>SEED</em></label>
+            <input class="inp" id="seed" type="text" value="لپ‌تاپ" placeholder="مثلاً: لپ‌تاپ، سئو، صنایع‌دستی…" autocomplete="off">
+          </div>
+
+          <div class="f">
+            <span class="f__l">شیوهٔ پویش <em>MODE</em></span>
+            <div class="modes" role="group" aria-label="شیوهٔ پویش">
+              <button type="button" id="mFlat" aria-pressed="false" onclick="setMode(false)">تک‌لایه</button>
+              <button type="button" id="mDeep" aria-pressed="true" onclick="setMode(true)">چندلایه</button>
+            </div>
+          </div>
+
+          <div class="f f--full" id="depthF">
+            <label class="f__l" for="depth">ژرفای پویش <em>DEPTH · ۲ تا ۱۰</em></label>
+            <div class="depth">
+              <input type="range" id="depth" min="2" max="10" value="4">
+              <span class="depth__v" id="depthV">۴</span>
+            </div>
+            <span class="f__h">هر پیشنهادِ تازه، بذرِ لایهٔ بعد می‌شود. ژرفای بیشتر، درخواست بیشتر.</span>
+          </div>
+
+          <div class="f">
+            <label class="f__l" for="lang">زبان پویش <em>HL</em></label>
+            <select class="inp" id="lang">
+              <option value="fa" selected>فارسی</option>
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+              <option value="tr">Türkçe</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </div>
+
+          <div class="f">
+            <label class="f__l" for="country">منطقهٔ هدف <em>GL</em></label>
+            <select class="inp" id="country">
+              <option value="ir" selected>ایران</option>
+              <option value="us">United States</option>
+              <option value="ae">امارات</option>
+              <option value="tr">Türkiye</option>
+              <option value="de">Germany</option>
+            </select>
+          </div>
+
+          <div class="f f--full">
+            <label class="f__l" for="neg">کلمات ناخواسته <em>EXCLUDE</em></label>
+            <input class="inp" id="neg" type="text" placeholder="تعمیر، دسته‌دوم، شکسته…" autocomplete="off" style="font-size:16.5px">
+            <span class="f__h">هر پیشنهادی که یکی از این واژه‌ها را داشته باشد، کنار می‌رود. با ویرگول جدا کنید.</span>
+          </div>
+
+          <div class="f">
+            <label class="f__l" for="delay">مکث میان درخواست‌ها <em>MILLISECONDS</em></label>
+            <input class="inp" id="delay" type="text" value="250" inputmode="numeric" style="font-size:16.5px">
+          </div>
+
+          <div class="f">
+            <label class="f__l" for="seeds">بیشینهٔ بذر هر لایه <em>MAX SEEDS</em></label>
+            <input class="inp" id="seeds" type="text" value="25" inputmode="numeric" style="font-size:16.5px">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" onclick="run()" id="goBtn">آغاز استخراج</button>
+          <span class="fine">Enter را هم می‌توانید بزنید.</span>
+        </div>
+
+        <div class="flow" id="flow" aria-live="polite">
+          <div class="flow__l">
+            <span><b id="fPhase">لایهٔ ۱</b> — پیوند با الفبا</span>
+            <span><span id="fCount">۰</span> درخواست · <span id="fPct">۰٪</span></span>
+          </div>
+          <div class="flow__track"><i id="fFill"></i></div>
+          <div class="flow__q" id="fQuery">در انتظار…</div>
+        </div>
+      </section>
+
+      <section class="res" id="results">
+        <div class="res__hd">
+          <h2><span id="resN">۰</span> پیشنهاد<br>در برگهٔ نتایج</h2>
+          <div class="res__acts">
+            <button class="btn btn--o btn--s" onclick="copyAll()">کپی همه</button>
+            <button class="btn btn--s" onclick="toast('برگهٔ TXT ذخیره شد')">دانلود TXT</button>
+          </div>
+        </div>
+
+        <div class="cloud" id="cloud"></div>
+
+        <div class="figures">
+          <div class="fig"><span class="fig__k">کوتاه — یک یا دو واژه</span><span class="fig__d"></span><span class="fig__v" id="gS">۰</span></div>
+          <div class="fig fig--s"><span class="fig__k">دنباله‌بلند — مناسب H۲</span><span class="fig__d"></span><span class="fig__v" id="gL">۰</span></div>
+          <div class="fig fig--c"><span class="fig__k">ژرفای پیموده‌شده</span><span class="fig__d"></span><span class="fig__v" id="gD">۰</span></div>
+          <div class="fig"><span class="fig__k">درخواست‌های ارسالی</span><span class="fig__d"></span><span class="fig__v" id="gR">۰</span></div>
+        </div>
+
+        <blockquote class="pull">
+          واژه‌هایی که در چند لایه <em>بازگشته‌اند</em>، همان‌هایی‌اند که مردم واقعاً دنبالشان می‌گردند.
+        </blockquote>
+      </section>
+
+      <section class="how" id="how">
+        <h2>سه گام، تا عمق.</h2>
+        <div class="how__sub">How the harvester works</div>
+        <div class="steps">
+          <div class="step">
+            <span class="step__n">۰۱</span>
+            <h3>آمیزش با الفبا</h3>
+            <p>واژهٔ شما با هر حرف زبان مقصد سوار و سوار می‌شود تا دامنهٔ نخستین پیشنهادها ساخته شود.</p>
+          </div>
+          <div class="step">
+            <span class="step__n">۰۲</span>
+            <h3>گشودن لایه‌ها</h3>
+            <p>هر پیشنهاد تازه به بذر لایهٔ بعد بدل می‌شود؛ تا ده پله، با مکثی کنترل‌شده میان درخواست‌ها.</p>
+          </div>
+          <div class="step">
+            <span class="step__n">۰۳</span>
+            <h3>پالایش و رتبه‌بندی</h3>
+            <p>تکرارها یکی، کلمات ناخواسته حذف، و خروجی بر پایهٔ بسامد و ژرفا مرتب می‌شود.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- حاشیهٔ کنار ستون -->
+    <aside class="margin" aria-label="یادداشت‌های حاشیه">
+      <div class="mnote">
+        <b>نکته</b>
+        نتایج را پیش از ویرایش محتوا، در <i>صفحهٔ فرود</i> بگنجانید؛ الگوریتم گوگل هم‌خوانی موضوع را می‌خواند.
+      </div>
+      <div class="mnote">
+        <span class="num" id="mnNum">۰</span>
+        <b>شمارش زنده</b>
+        تعداد پیشنهادهای یکتایی که تاکنون در این نشست ثبت شده است.
+      </div>
+      <div class="mnote">
+        <b>چرا ژرفا؟</b>
+        عبارت‌های چهارواژه‌ای رقابت کمتری دارند و نرخ تبدیل بالاتری می‌آورند؛ <i>عمق، کیفیت ترافیک را می‌سازد.</i>
+      </div>
+      <div class="mnote">
+        <b>کنترل ترافیک</b>
+        مکث کمتر از ۲۵۰ میلی‌ثانیه ممکن است درخواست‌ها را مسدود کند. صبر، بخشی از الگوریتم است.
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="foot">
+      <span>حاشیه — پژوهش واژگان بر پایهٔ Google Autocomplete</span>
+      <span>پیشنهادها متعلق به Google LLC است</span>
+      <span>ساختهٔ <a href="https://zarwan.co" target="_blank" rel="noopener">Zarwan</a></span>
+      <span class="foot__langs"><a href="?lang=fa">FA</a><a href="?lang=en">EN</a><a href="?lang=ar">AR</a></span>
+    </div>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const DATA=[
+ ["لپ‌تاپ دل",1,5],["لپ‌تاپ ایسوس",1,4],["لپ‌تاپ گیمینگ",1,4],
+ ["لپ‌تاپ دانشجویی",1,3],["قیمت لپ‌تاپ",1,3],["لپ‌تاپ اپل",1,3],
+ ["لپ‌تاپ استوک",2,3],["لپ‌تاپ ایسر",2,2],["لپ‌تاپ تا ۲۰ میلیون",2,2],
+ ["بهترین لپ‌تاپ ۱۴۰۵",2,2],["لپ‌تاپ لنوو",2,2],["لپ‌تاپ مناسب برنامه‌نویسی",3,2],
+ ["خرید اقساطی لپ‌تاپ",3,2],["مقایسه لپ‌تاپ ایسوس و دل",3,1],["لپ‌تاپ سبک برای دانشجو",3,1],
+ ["لپ‌تاپ مک‌بوک ایر",4,2],["تعمیر لپ‌تاپ در تهران",4,1],["گارانتی لپ‌تاپ اصل",4,1],
+ ["لپ‌تاپ زیر ۱۵ میلیون",4,1],["لپ‌تاپ مناسب طراحی",4,1]
+];
+const FA=n=>String(n).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
+const $=id=>document.getElementById(id);
+let deep=true,depth=4,timer=null;
+
+const depthEl=$('depth');
+depthEl.addEventListener('input',()=>{depth=+depthEl.value;$('depthV').textContent=FA(depth)});
+$('depthV').textContent=FA(depth);
+
+function setMode(d){
+  deep=d;
+  $('mDeep').setAttribute('aria-pressed',d);
+  $('mFlat').setAttribute('aria-pressed',!d);
+  $('depthF').style.opacity=d?'1':'.35';
+  depthEl.disabled=!d;
+}
+setMode(true);
+
+function run(){
+  if(timer)clearInterval(timer);
+  const seed=$('seed').value.trim()||'لپ‌تاپ';
+  const maxL=deep?depth:1;
+  const total=maxL*42;
+  let cur=0;
+  $('res').classList.remove('on');
+  $('flow').classList.add('on');
+  $('goBtn').disabled=true;$('goBtn').style.opacity='.55';
+  timer=setInterval(()=>{
+    cur=Math.min(total,cur+Math.ceil(total/24));
+    const pct=cur/total*100;
+    const L=Math.min(maxL,Math.floor(pct/100*maxL)+1);
+    $('fFill').style.width=pct+'%';
+    $('fPct').textContent=FA(Math.round(pct))+'٪';
+    $('fCount').textContent=FA(cur);
+    $('fPhase').textContent = L===1 ? 'لایهٔ ۱ — پیوند با الفبا' : 'لایهٔ '+FA(L)+' — پیشنهادهای مستقیم';
+    $('fQuery').textContent='«'+seed+' '+FA(L)+'»';
+    if(cur>=total){
+      clearInterval(timer);timer=null;
+      $('goBtn').disabled=false;$('goBtn').style.opacity='1';
+      setTimeout(render,320);
+    }
+  },90);
+}
+
+function render(){
+  const maxL=deep?depth:1;
+  const list=DATA.filter(d=>d[1]<=maxL);
+  const seed=$('seed').value.trim()||'لپ‌تاپ';
+  $('resN').textContent=FA(list.length);
+  $('mnNum').textContent=FA(list.length);
+
+  const cloud=$('cloud');cloud.innerHTML='';
+  list.forEach(d=>{
+    const a=document.createElement('a');
+    a.className='chip sz'+(d[2]>=4?3:d[2]>=2?2:1);
+    a.href='https://www.google.com/search?q='+encodeURIComponent(d[0]);
+    a.target='_blank';a.rel='noopener';
+    a.innerHTML=`<span class="chip__t">${d[0].replace(seed,`<mark>${seed}</mark>`)}</span>
+      ${d[2]>1?`<span class="chip__c">×${FA(d[2])}</span>`:''}
+      <span class="chip__l">L${d[1]}</span>`;
+    cloud.appendChild(a);
+  });
+
+  const long=list.filter(d=>d[0].split(' ').length>2).length;
+  $('gS').textContent=FA(list.length-long);
+  $('gL').textContent=FA(long);
+  $('gD').textContent=FA(maxL);
+  $('gR').textContent=FA(deep?depth*42:1);
+  $('res').classList.add('on');
+  setTimeout(()=>$('results').scrollIntoView({behavior:'smooth',block:'start'}),90);
+}
+
+function copyAll(){navigator.clipboard.writeText(DATA.map(d=>d[0]).join('\n')).then(()=>toast('۲۰ پیشنهاد کپی شد ✓'))}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2400)}
+$('seed').addEventListener('keydown',e=>{if(e.key==='Enter')run()});
+</script>
+</body>
+</html>

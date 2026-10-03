@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>۰۴ — سوند · استخراج‌گر کلمات کلیدی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --room:#D8D4CB;
+  --panel:#E9E6DE;
+  --panel-hi:#F2F0EA;
+  --panel-lo:#CFCAC0;
+  --edge:#B4AEA2;
+  --ink:#2A2723;
+  --engrave:#6E6A61;
+  --screen:#12150F;
+  --screen-2:#1A1E16;
+  --led:#8DFF4F;
+  --led-dim:#3A5A28;
+  --orange:#FF5F1F;
+  --amber:#FFB02E;
+  --cyan:#4FD1C5;
+  --red:#E5484D;
+  --mono:'JetBrains Mono',monospace;
+  --pk:'Chakra Petch',sans-serif;
+  --sans:'Vazirmatn',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--room);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;
+  background-image:radial-gradient(circle at 30% -10%,#E6E2D8 0%,transparent 55%),
+                   linear-gradient(180deg,#D5D1C8,#C9C4BA);
+  min-height:100vh;padding-bottom:70px;
+}
+::selection{background:var(--orange);color:#fff}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+
+/* ── پلاک دستگاه ── */
+.device{margin-top:30px;position:relative}
+.face{
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel) 24%,var(--panel-lo));
+  border:1px solid var(--edge);border-radius:10px;
+  box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 -2px 0 rgba(0,0,0,.06) inset,
+             0 22px 45px -26px rgba(40,35,28,.55),0 3px 8px -3px rgba(40,35,28,.28);
+  position:relative;overflow:hidden;
+}
+.face::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  opacity:.05;mix-blend-mode:multiply;
+}
+.screw{
+  position:absolute;width:13px;height:13px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#F4F2EC,#A8A296 60%,#8A8478);
+  box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 0 0 1px rgba(0,0,0,.12);
+}
+.screw::after{
+  content:"";position:absolute;inset:0;margin:auto;width:9px;height:1.6px;
+  background:#6E6A61;transform:rotate(38deg);border-radius:1px;
+}
+.screw.tl{top:11px;left:11px}.screw.tr{top:11px;right:11px}
+.screw.bl{bottom:11px;left:11px}.screw.br{bottom:11px;right:11px}
+
+.face__hd{
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+  padding:22px 34px 18px;border-bottom:1px solid var(--edge);
+  box-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand__n{
+  font-family:var(--pk);font-weight:700;font-size:26px;letter-spacing:.16em;
+  color:var(--ink);text-shadow:0 1px 0 rgba(255,255,255,.75);
+}
+.brand__n span{color:var(--orange)}
+.brand__m{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--engrave);
+  border:1px solid var(--edge);padding:4px 9px;background:rgba(255,255,255,.4);border-radius:3px;
+}
+.hdr__ctrls{display:flex;gap:9px;align-items:center}
+.langbtn{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;color:var(--engrave);
+  background:linear-gradient(180deg,#F5F3EE,#DCD8CF);border:1px solid var(--edge);
+  padding:7px 13px;border-radius:4px;cursor:pointer;text-decoration:none;
+  box-shadow:0 1px 0 #fff inset,0 1px 2px rgba(0,0,0,.15);transition:.14s;
+}
+.langbtn:hover{color:var(--ink);background:linear-gradient(180deg,#fff,#E6E2D8)}
+.langbtn.on{background:linear-gradient(180deg,#3A3730,#25231E);color:#EDE9DF;border-color:#25231E}
+.langbtn:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+
+.face__bd{padding:30px 34px 34px}
+@media(max-width:700px){.face__bd{padding:24px 18px 26px}.face__hd{padding:20px 18px 16px}}
+
+/* ── صفحهٔ نمایش LCD ── */
+.lcd{
+  background:linear-gradient(180deg,#0E110C,#171B12);
+  border:1px solid #05060450;border-radius:6px;padding:18px 20px;
+  box-shadow:inset 0 3px 14px rgba(0,0,0,.85),inset 0 0 0 1px rgba(141,255,79,.09),
+             0 1px 0 rgba(255,255,255,.7);
+  position:relative;overflow:hidden;
+}
+.lcd::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);
+  opacity:.5;
+}
+.lcd__row{
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:12px;color:var(--led);letter-spacing:.08em;
+  position:relative;z-index:1;
+}
+.lcd__row+.lcd__row{margin-top:8px}
+.lcd__row .k{color:#4E7A3A}
+.lcd__big{
+  font-family:var(--mono);font-size:clamp(22px,4.4vw,34px);font-weight:700;color:var(--led);
+  margin-top:10px;position:relative;z-index:1;letter-spacing:.02em;
+  text-shadow:0 0 14px rgba(141,255,79,.45);
+}
+.lcd__big .cur{display:inline-block;width:.55em;height:1em;background:var(--led);vertical-align:-.12em;animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.lcd__bar{display:flex;gap:3px;margin-top:14px;position:relative;z-index:1;direction:ltr}
+.lcd__bar i{flex:1;height:12px;background:#24301C;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
+.lcd__bar i.on{background:var(--led);box-shadow:0 0 8px rgba(141,255,79,.7)}
+.lcd__bar i.hot{background:var(--amber);box-shadow:0 0 8px rgba(255,176,46,.7)}
+
+/* ── چیدمان کنترل‌ها ── */
+.rack{display:grid;gap:24px;margin-top:26px}
+@media(min-width:940px){.rack{grid-template-columns:1.25fr 1fr;gap:30px}}
+.mod{
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.15));
+  border:1px solid var(--edge);border-radius:8px;padding:18px 18px 20px;
+  box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 2px 5px -3px rgba(0,0,0,.25);
+}
+.mod+.mod{margin-top:0}
+.mod__t{
+  font-family:var(--pk);font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--engrave);
+  display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px;
+  text-transform:uppercase;
+}
+.mod__t b{color:var(--orange);font-size:13px;letter-spacing:.06em}
+
+/* ورودی‌ها */
+.lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--engrave);margin-bottom:6px;display:block}
+.inp{
+  font-family:var(--sans);font-size:17px;font-weight:600;color:#DFF5CE;background:#15180F;
+  border:1px solid #0A0C07;border-radius:4px;padding:12px 14px;width:100%;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.7);
+  caret-color:var(--led);text-shadow:0 0 8px rgba(141,255,79,.3);
+}
+.inp::placeholder{color:#4E6B3C;text-shadow:none;font-weight:400}
+.inp:focus{outline:none;box-shadow:inset 0 2px 8px rgba(0,0,0,.7),0 0 0 2px var(--orange)}
+.ctl{margin-bottom:16px}
+.ctl:last-child{margin-bottom:0}
+.inp--sec{
+  font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);
+  background:linear-gradient(180deg,#FCFBF7,#E4E0D6);border:1px solid var(--edge);
+  box-shadow:0 1px 0 #fff inset,0 1px 2px rgba(0,0,0,.12);text-shadow:none;
+}
+.inp--sec:focus{box-shadow:0 1px 0 #fff inset,0 0 0 2px var(--orange);outline:none}
+select.inp--sec{
+  appearance:none;cursor:pointer;padding-left:34px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--engrave) 50%),linear-gradient(135deg,var(--engrave) 50%,transparent 50%);
+  background-position:left 15px top 55%,left 9px top 55%;background-size:6px 6px;background-repeat:no-repeat;
+}
+.hint{font-size:12.5px;color:var(--engrave);line-height:1.6;margin-top:6px}
+
+/* کلید دو حالته فیزیکی */
+.rocker{display:flex;gap:0;border:1px solid var(--edge);border-radius:5px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.rocker button{
+  flex:1;font-family:var(--pk);font-size:13.5px;font-weight:600;letter-spacing:.04em;
+  background:linear-gradient(180deg,#F6F4EF,#D9D5CB);color:var(--engrave);
+  border:none;padding:13px 6px;cursor:pointer;transition:.12s;
+}
+.rocker button+button{border-inline-start:1px solid var(--edge)}
+.rocker button[aria-pressed=true]{
+  background:linear-gradient(180deg,#2E2B25,#1C1A16);color:#FFE9DB;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.55);
+}
+.rocker button:hover:not([aria-pressed=true]){color:var(--ink);background:linear-gradient(180deg,#fff,#E2DED4)}
+.rocker button:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}
+
+/* نوار LED لایه‌ها — ده پله */
+.ledrow{display:flex;gap:6px;direction:ltr;justify-content:space-between}
+.ledrow button{
+  flex:1;height:46px;border:1px solid var(--edge);border-radius:4px;cursor:pointer;
+  background:linear-gradient(180deg,#F4F2EC,#D6D2C8);position:relative;transition:.12s;
+  box-shadow:0 1px 0 #fff inset,0 1px 2px rgba(0,0,0,.16);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+}
+.ledrow button:hover{background:linear-gradient(180deg,#fff,#E4E0D6)}
+.ledrow button .bulb{
+  width:11px;height:11px;border-radius:50%;background:#4A4740;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.6);
+}
+.ledrow button .num{font-family:var(--mono);font-size:9.5px;color:var(--engrave);font-weight:700}
+.ledrow button.on{background:linear-gradient(180deg,#F8F6F1,#E0DCD2)}
+.ledrow button.on .bulb{background:var(--orange);box-shadow:0 0 9px rgba(255,95,31,.85),inset 0 1px 1px rgba(255,255,255,.5)}
+.ledrow button.on .num{color:var(--ink)}
+.ledrow button:last-child.on .bulb{background:var(--amber);box-shadow:0 0 9px rgba(255,176,46,.85)}
+.ledrow button:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.ledscale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--engrave);margin-top:7px;letter-spacing:.06em;direction:ltr}
+
+/* اهرم اجرا */
+.levers{display:flex;gap:14px;align-items:stretch;margin-top:26px;flex-wrap:wrap}
+.lever{
+  font-family:var(--pk);font-size:16px;font-weight:700;letter-spacing:.1em;cursor:pointer;
+  padding:16px 34px;border-radius:5px;border:1px solid #C4390C;color:#fff;
+  background:linear-gradient(180deg,#FF7A45,#E84B12 55%,#C93D0C);
+  box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 4px 0 #9E3109,0 8px 16px -6px rgba(0,0,0,.5);
+  transition:.1s;
+}
+.lever:hover{background:linear-gradient(180deg,#FF8A5B,#F2551A 55%,#D6430E)}
+.lever:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 0 0 #9E3109}
+.lever:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.lever:disabled{filter:grayscale(.7);cursor:progress;transform:none}
+.lever--stop{
+  background:linear-gradient(180deg,#57534B,#3A3730 55%,#2A2723);border-color:#22201B;
+  box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 4px 0 #1C1A16,0 8px 16px -6px rgba(0,0,0,.5);
+  font-size:14px;padding:16px 26px;
+}
+.lever--stop:active{transform:translateY(4px);box-shadow:0 0 0 #1C1A16}
+.lever .l2{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;opacity:.75;font-weight:500}
+
+/* ── خروجی: کاغذ پرفراژ ── */
+.printout{display:none;margin-top:40px}
+.printout.on{display:block}
+.paper{
+  background:#FBFAF4;position:relative;
+  box-shadow:0 26px 50px -30px rgba(40,35,28,.6),0 2px 6px rgba(0,0,0,.12);
+  border-inline:1px solid #E4E0D4;
+  padding:0;overflow:hidden;
+}
+@media(min-width:760px){.paper{margin:0 26px}}
+/* لبهٔ پرفراژ */
+.perf{
+  height:22px;background:#FBFAF4;position:relative;
+  background-image:radial-gradient(circle,#C9C4B8 3.6px,transparent 3.8px);
+  background-size:26px 22px;background-position:13px 0;
+  border-block:1px dashed #D6D1C4;
+}
+.paper__hd{
+  padding:20px 30px 14px;border-bottom:2px solid var(--ink);
+  display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:flex-end;
+}
+.paper__hd h2{font-family:var(--pk);font-size:23px;font-weight:700;letter-spacing:.02em}
+.paper__hd h2 span{color:var(--orange)}
+.paper__meta{font-family:var(--mono);font-size:11px;color:var(--engrave);letter-spacing:.06em}
+.paper__acts{display:flex;gap:9px}
+.tbtn{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;cursor:pointer;
+  background:#fff;border:1px solid var(--edge);color:var(--ink);padding:9px 15px;border-radius:3px;
+  box-shadow:0 1px 0 #fff inset,0 1px 2px rgba(0,0,0,.12);transition:.13s;
+}
+.tbtn:hover{background:var(--ink);color:#FBFAF4;border-color:var(--ink)}
+.tbtn:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.tbtn--p{background:var(--ink);color:#FBFAF4;border-color:var(--ink)}
+.tbtn--p:hover{background:var(--orange);border-color:var(--orange)}
+
+/* ردیف‌های سبز-نوار */
+.ptable{width:100%;border-collapse:collapse;font-family:var(--mono);direction:ltr}
+.ptable thead th{
+  font-size:10.5px;letter-spacing:.16em;color:var(--engrave);text-align:left;
+  padding:12px 14px;border-bottom:1px solid var(--edge);font-weight:700;background:#F3F1E9;
+}
+.ptable tbody tr{cursor:pointer;transition:.12s}
+.ptable tbody tr:nth-child(even){background:#EEF3E6}
+.ptable tbody tr:hover,.ptable tbody tr:focus-visible{background:#FFE6D6;outline:none}
+.ptable tbody tr:hover .q{color:#C4390C}
+.ptable td{padding:11px 14px;font-size:13.5px;border-bottom:1px solid #E7E3D7;vertical-align:middle}
+.ptable td.idx{width:52px;color:#9A9486;font-size:12px}
+.ptable td.q{font-family:var(--sans);font-size:15.5px;font-weight:500;direction:rtl;text-align:right;color:var(--ink);width:auto}
+.ptable td.hits{width:74px;text-align:center;font-weight:700;color:#B4530A}
+.ptable td.lay{width:74px;text-align:right;font-size:12px;color:#3F6B5E}
+.ptable td.lay b{display:inline-block;background:#DDE9D4;border:1px solid #B9CBA9;padding:2px 7px;border-radius:2px;color:#3A5A28}
+@media(max-width:640px){.ptable td.lay,.ptable th.h-lay{display:none}.ptable td.q{font-size:14.5px}}
+
+/* کارنگ آمار */
+.counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:34px}
+.ctr{
+  background:linear-gradient(180deg,#1A1D15,#101209);border:1px solid #05060400;border-radius:6px;
+  padding:16px 16px 14px;box-shadow:inset 0 3px 12px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.7);
+  position:relative;overflow:hidden;
+}
+.ctr::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(0,0,0,.2) 0 1px,transparent 1px 3px);pointer-events:none}
+.ctr__k{font-family:var(--pk);font-size:9.5px;letter-spacing:.18em;color:#5C7A4A;margin-bottom:8px}
+.ctr__v{
+  font-family:var(--mono);font-size:34px;font-weight:700;color:var(--led);
+  text-shadow:0 0 12px rgba(141,255,79,.5);line-height:1;
+}
+.ctr--o .ctr__v{color:var(--amber);text-shadow:0 0 12px rgba(255,176,46,.5)}
+.ctr__s{font-family:var(--mono);font-size:10px;color:#4A5C3E;margin-top:7px;letter-spacing:.05em}
+
+.advice{
+  margin-top:30px;border:1px solid var(--edge);border-inline-start:4px solid var(--orange);
+  background:rgba(255,255,255,.45);padding:18px 20px;font-size:14.5px;line-height:2;color:#4A463F;
+}
+.advice b{font-family:var(--pk);font-size:11px;letter-spacing:.18em;color:var(--orange);display:block;margin-bottom:6px}
+
+footer{
+  max-width:1180px;margin:52px auto 0;padding:22px 18px 0;border-top:1px solid var(--edge);
+  display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
+  font-family:var(--mono);font-size:11.5px;color:var(--engrave);letter-spacing:.06em;
+}
+footer a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--edge)}
+footer a:hover{color:var(--orange);border-color:var(--orange)}
+
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:100;
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;
+  background:#1A1D15;color:var(--led);padding:14px 20px;border-radius:5px;
+  border:1px solid #2E3A24;box-shadow:0 12px 30px -10px rgba(0,0,0,.6);
+  transform:translateY(160%);transition:.3s cubic-bezier(.2,.8,.2,1);
+}
+.toast.on{transform:translateY(0)}
+@media(max-width:600px){.toast{left:16px;right:16px;text-align:center}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="device">
+    <div class="face">
+      <span class="screw tl"></span><span class="screw tr"></span>
+      <span class="screw bl"></span><span class="screw br"></span>
+
+      <div class="face__hd">
+        <div class="brand">
+          <div class="brand__n">SONDE<span>·</span>MK-II</div>
+          <div class="brand__m">AUTOCOMPLETE ANALYZER</div>
+          <div class="brand__m">MODEL GX-10</div>
+        </div>
+        <div class="hdr__ctrls">
+          <a class="langbtn on" href="#">FA</a>
+          <a class="langbtn" href="?lang=en">EN</a>
+          <a class="langbtn" href="?lang=ar">AR</a>
+        </div>
+      </div>
+
+      <div class="face__bd">
+        <!-- نمایشگر -->
+        <div class="lcd" aria-live="polite">
+          <div class="lcd__row"><span class="k">STATUS</span><span id="lcdStatus">READY · آماده</span></div>
+          <div class="lcd__row"><span class="k">TARGET</span><span id="lcdTarget">hl=fa · gl=ir · mode=DEEP</span></div>
+          <div class="lcd__big" id="lcdBig">لپ‌تاپ<span class="cur"></span></div>
+          <div class="lcd__bar" id="lcdBar" aria-hidden="true"></div>
+        </div>
+
+        <div class="rack">
+          <!-- ستون کنترل -->
+          <div>
+            <div class="mod">
+              <div class="mod__t"><span>ورودی / INPUT</span><b>۰۱</b></div>
+              <div class="ctl">
+                <label class="lab" for="seed">SEED — واژهٔ کلیدی</label>
+                <input class="inp" id="seed" type="text" value="لپ‌تاپ" placeholder="کلمه را اینجا بنویسید…" autocomplete="off">
+              </div>
+              <div class="ctl">
+                <label class="lab" for="neg">EXCLUDE — کلمات حذف</label>
+                <input class="inp inp--sec" id="neg" type="text" placeholder="تعمیر، دسته‌دوم…" autocomplete="off">
+                <div class="hint">هر پیشنهادی که یکی از این واژه‌ها را داشته باشد، ثبت نمی‌شود.</div>
+              </div>
+            </div>
+
+            <div class="mod" style="margin-top:20px">
+              <div class="mod__t"><span>حالت پویش / MODE</span><b>۰۲</b></div>
+              <div class="rocker" role="group" aria-label="حالت پویش">
+                <button type="button" id="rFlat" aria-pressed="false" onclick="setMode(false)">تک‌لایه · FLAT</button>
+                <button type="button" id="rDeep" aria-pressed="true" onclick="setMode(true)">چندلایه · DEEP</button>
+              </div>
+            </div>
+
+            <div class="mod" style="margin-top:20px">
+              <div class="mod__t"><span>تعداد لایه / DEPTH</span><b id="depthOut">۴</b></div>
+              <div class="ledrow" id="ledrow" role="group" aria-label="تعداد لایه"></div>
+              <div class="ledscale"><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span></div>
+              <div class="hint">هر پله روشن، یک لایهٔ عمیق‌تر. حداکثر ۱۰ پله.</div>
+            </div>
+          </div>
+
+          <!-- ستون تنظیم -->
+          <div>
+            <div class="mod">
+              <div class="mod__t"><span>هدف / TARGET</span><b>۰۳</b></div>
+              <div class="ctl">
+                <label class="lab" for="lang">LANGUAGE — زبان</label>
+                <select class="inp--sec inp" id="lang">
+                  <option value="fa" selected>فارسی — fa</option>
+                  <option value="en">English — en</option>
+                  <option value="ar">العربية — ar</option>
+                  <option value="tr">Türkçe — tr</option>
+                  <option value="de">Deutsch — de</option>
+                  <option value="fr">Français — fr</option>
+                </select>
+              </div>
+              <div class="ctl">
+                <label class="lab" for="country">REGION — منطقه</label>
+                <select class="inp--sec inp" id="country">
+                  <option value="ir" selected>ایران — ir</option>
+                  <option value="us">United States — us</option>
+                  <option value="ae">امارات — ae</option>
+                  <option value="tr">Türkiye — tr</option>
+                  <option value="de">Germany — de</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mod" style="margin-top:20px">
+              <div class="mod__t"><span>تنظیم / TIMING</span><b>۰۴</b></div>
+              <div class="ctl">
+                <label class="lab" for="delay">DELAY — مکث (ms)</label>
+                <input class="inp--sec inp" id="delay" type="text" value="250" inputmode="numeric">
+              </div>
+              <div class="ctl">
+                <label class="lab" for="seeds">MAX SEEDS — بذر هر لایه</label>
+                <input class="inp--sec inp" id="seeds" type="text" value="25" inputmode="numeric">
+                <div class="hint">برای پایداری، مکث کمتر از ۲۵۰ms توصیه نمی‌شود.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="levers">
+          <button class="lever" id="goBtn" onclick="run()">شروع استخراج<span class="l2">PRESS TO SCAN</span></button>
+          <button class="lever lever--stop" id="stopBtn" onclick="stopScan()">توقف<span class="l2">HALT</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- کاغذ چاپی -->
+  <div class="printout" id="printout">
+    <div class="perf"></div>
+    <div class="paper">
+      <div class="paper__hd">
+        <div>
+          <h2>گزارش استخراج — <span id="resN">۰</span> پیشنهاد</h2>
+          <div class="paper__meta" id="paperMeta">SEED: لپ‌تاپ · MODE: DEEP · 4 LAYERS · 250ms</div>
+        </div>
+        <div class="paper__acts">
+          <button class="tbtn" onclick="copyAll()">COPY ALL</button>
+          <button class="tbtn tbtn--p" onclick="toast('فایل TXT ذخیره شد')">DOWNLOAD .TXT</button>
+        </div>
+      </div>
+      <table class="ptable">
+        <thead>
+          <tr>
+            <th class="idx">NO.</th>
+            <th style="text-align:right">SUGGESTION / پیشنهاد</th>
+            <th style="text-align:center">HITS</th>
+            <th class="h-lay" style="text-align:right">LAYER</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="perf"></div>
+    </div>
+
+    <div class="counters">
+      <div class="ctr"><div class="ctr__k">SHORT ≤ 2 WORDS</div><div class="ctr__v" id="cS">00</div><div class="ctr__s">رقابتی</div></div>
+      <div class="ctr"><div class="ctr__k">LONG-TAIL</div><div class="ctr__v" id="cL">00</div><div class="ctr__s">مناسب H2</div></div>
+      <div class="ctr ctr--o"><div class="ctr__k">DEPTH REACHED</div><div class="ctr__v" id="cD">00</div><div class="ctr__s">از ۱۰ پله</div></div>
+      <div class="ctr"><div class="ctr__k">REQUESTS</div><div class="ctr__v" id="cR">000</div><div class="ctr__s">درخواست موفق</div></div>
+    </div>
+
+    <div class="advice">
+      <b>▸ یادداشت فنی</b>
+      پیشنهادهای تکرارشده در چند لایه نشانهٔ تقاضای واقعی‌اند؛ آن‌ها را در تیتر H۲ بگنجانید.
+      عبارت‌های چهارواژه‌ای نرخ تبدیل بالاتری دارند و برای صفحهٔ فرود مناسب‌ترند.
+    </div>
+  </div>
+
+  <footer>
+    <span>SONDE MK-II · CLIENT-SIDE HARVESTER</span>
+    <span>پیشنهادها متعلق به Google LLC است</span>
+    <span>ساختهٔ <a href="https://zarwan.co" target="_blank" rel="noopener">Zarwan</a></span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const DATA=[
+ ["لپ‌تاپ دل",1,5],["لپ‌تاپ ایسوس",1,4],["لپ‌تاپ گیمینگ",1,4],
+ ["لپ‌تاپ دانشجویی",1,3],["قیمت لپ‌تاپ",1,3],["لپ‌تاپ اپل",1,3],
+ ["لپ‌تاپ استوک",2,3],["لپ‌تاپ ایسر",2,2],["لپ‌تاپ تا ۲۰ میلیون",2,2],
+ ["بهترین لپ‌تاپ ۱۴۰۵",2,2],["لپ‌تاپ لنوو",2,2],["لپ‌تاپ مناسب برنامه‌نویسی",3,2],
+ ["خرید اقساطی لپ‌تاپ",3,2],["مقایسه لپ‌تاپ ایسوس و دل",3,1],["لپ‌تاپ سبک برای دانشجو",3,1],
+ ["لپ‌تاپ مک‌بوک ایر",4,2],["تعمیر لپ‌تاپ در تهران",4,1],["گارانتی لپ‌تاپ اصل",4,1],
+ ["لپ‌تاپ زیر ۱۵ میلیون",4,1],["لپ‌تاپ مناسب طراحی",4,1]
+];
+const FA=n=>String(n).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
+const $=id=>document.getElementById(id);
+let deep=true,depth=4,timer=null;
+
+/* نوار لایه‌ها */
+function drawLeds(){
+  const r=$('ledrow');r.innerHTML='';
+  for(let i=2;i<=10;i++){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className=i<=depth?'on':'';
+    b.setAttribute('aria-label',i+' لایه');
+    b.setAttribute('aria-pressed',i<=depth);
+    b.innerHTML=`<span class="bulb"></span><span class="num">${i}</span>`;
+    b.onclick=()=>{depth=i;drawLeds();updateLcd()};
+    r.appendChild(b);
+  }
+  $('depthOut').textContent=FA(depth);
+}
+/* نمایشگر پیشرفت داخل LCD */
+function drawLcdBar(pct){
+  const bar=$('lcdBar');
+  if(!bar.children.length){for(let i=0;i<24;i++)bar.appendChild(document.createElement('i'))}
+  const n=Math.round(pct/100*24);
+  [...bar.children].forEach((el,i)=>{
+    el.className = i<n ? (i===n-1?'hot':'on') : '';
+  });
+}
+drawLcdBar(0);
+
+function updateLcd(){
+  const seed=$('seed').value.trim()||'—';
+  $('lcdBig').innerHTML=seed+'<span class="cur"></span>';
+  $('lcdTarget').textContent=`hl=${$('lang').value} · gl=${$('country').value} · mode=${deep?'DEEP('+depth+')':'FLAT'}`;
+}
+['seed','lang','country'].forEach(id=>$(id).addEventListener('input',updateLcd));
+updateLcd();
+
+function setMode(d){
+  deep=d;
+  $('rDeep').setAttribute('aria-pressed',d);
+  $('rFlat').setAttribute('aria-pressed',!d);
+  $('ledrow').style.opacity=d?'1':'.35';
+  $('ledrow').style.pointerEvents=d?'auto':'none';
+  updateLcd();
+}
+
+function run(){
+  if(timer)clearInterval(timer);
+  const seed=$('seed').value.trim()||'لپ‌تاپ';
+  const maxL=deep?depth:1;
+  const total=maxL*42;
+  let cur=0;
+  $('printout').classList.remove('on');
+  $('goBtn').disabled=true;
+  $('lcdStatus').textContent='SCANNING · در حال پویش';
+  $('stopBtn').onclick=()=>stopScan(true);
+  timer=setInterval(()=>{
+    cur=Math.min(total,cur+Math.ceil(total/24));
+    const pct=cur/total*100;
+    const L=Math.min(maxL,Math.floor(pct/100*maxL)+1);
+    drawLcdBar(pct);
+    $('lcdStatus').textContent=`LAYER ${L}/${maxL} · ${cur}/${total} REQ · ${Math.round(pct)}%`;
+    if(cur>=total){
+      clearInterval(timer);timer=null;
+      $('goBtn').disabled=false;
+      $('lcdStatus').textContent='COMPLETE · تکمیل شد';
+      setTimeout(render,320);
+    }
+  },90);
+}
+function stopScan(fromBtn){
+  if(timer){clearInterval(timer);timer=null;$('goBtn').disabled=false;
+    $('lcdStatus').textContent='HALTED · متوقف شد';render();}
+}
+
+function render(){
+  const maxL=deep?depth:1;
+  const list=DATA.filter(d=>d[1]<=maxL);
+  const seed=$('seed').value.trim()||'لپ‌تاپ';
+  $('resN').textContent=FA(list.length);
+  $('paperMeta').textContent=`SEED: ${seed} · MODE: ${deep?'DEEP':'FLAT'} · ${maxL} LAYERS · ${$('delay').value||250}ms`;
+  const tb=$('rows');tb.innerHTML='';
+  list.forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    tr.tabIndex=0;
+    tr.onclick=()=>window.open('https://www.google.com/search?q='+encodeURIComponent(d[0]),'_blank');
+    tr.onkeydown=e=>{if(e.key==='Enter')tr.click()};
+    tr.innerHTML=`<td class="idx">${String(i+1).padStart(3,'0')}</td>
+      <td class="q">${d[0]}</td>
+      <td class="hits">×${d[2]}</td>
+      <td class="lay"><b>L${d[1]}</b></td>`;
+    tb.appendChild(tr);
+  });
+  const long=list.filter(d=>d[0].split(' ').length>2).length;
+  const pad=(n,l=2)=>String(n).padStart(l,'0');
+  $('cS').textContent=pad(list.length-long);
+  $('cL').textContent=pad(long);
+  $('cD').textContent=pad(maxL);
+  $('cR').textContent=pad(deep?depth*42:1,3);
+  $('printout').classList.add('on');
+  setTimeout(()=>$('printout').scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+function copyAll(){navigator.clipboard.writeText(DATA.map(d=>d[0]).join('\n')).then(()=>toast('۲۰ پیشنهاد کپی شد ✓'))}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2400)}
+$('seed').addEventListener('keydown',e=>{if(e.key==='Enter')run()});
+drawLeds();
+</script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نمونه‌های بازطراحی · استخراج‌گر کلمات کلیدی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFECE4;--ink:#1C1A17;--muted:#6B6459;--line:#D2CBBD;--clay:#B5654A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--paper);color:var(--ink);font-family:'Vazirmatn',sans-serif;
+  font-size:16px;line-height:1.85;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9;opacity:.4;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.2'/%3E%3C/svg%3E");
+}
+::selection{background:var(--clay);color:#fff}
+.wrap{max-width:1160px;margin:0 auto;padding:0 26px}
+
+.hd{padding:52px 0 30px;border-bottom:4px solid var(--ink)}
+.hd__kick{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.24em;
+  color:var(--clay);margin-bottom:20px;
+}
+.hd h1{font-family:'Markazi Text',serif;font-size:clamp(38px,7vw,68px);font-weight:600;line-height:1.1}
+.hd p{margin-top:18px;max-width:62ch;color:#4A443D;font-size:16.5px}
+.hd__meta{
+  display:flex;flex-wrap:wrap;gap:26px;margin-top:26px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.1em;color:var(--muted);
+}
+.hd__meta b{color:var(--ink);font-weight:500}
+
+.warn{
+  margin-top:34px;background:#fff;border:1.5px solid var(--ink);
+  border-inline-start:6px solid var(--clay);padding:18px 22px;font-size:15.5px;line-height:1.95;
+}
+.warn b{font-weight:600}
+
+.grid{display:grid;gap:26px;margin-top:44px;padding-bottom:70px}
+@media(min-width:860px){.grid{grid-template-columns:1fr 1fr}}
+
+.card{
+  background:#fff;border:1.5px solid var(--ink);display:flex;flex-direction:column;
+  text-decoration:none;color:inherit;transition:.22s;position:relative;overflow:hidden;
+}
+.card:hover{transform:translate(-4px,-4px);box-shadow:8px 8px 0 var(--ink)}
+.card:focus-visible{outline:3px solid var(--clay);outline-offset:4px}
+.card__bar{
+  padding:11px 18px;background:var(--ink);color:var(--paper);
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.16em;
+  display:flex;justify-content:space-between;gap:12px;
+}
+.card__prev{height:190px;position:relative;overflow:hidden;border-bottom:1.5px solid var(--ink)}
+.card__prev .fake{position:absolute;inset:0;padding:22px 24px}
+
+/* پیش‌نمایش‌ها */
+.p1{background:#F3EDE3}
+.p1 .t{font-family:'Markazi Text',serif;font-size:34px;color:#191512;line-height:1}
+.p1 .t i{color:#B0362A;font-style:normal}
+.p1 .r{height:3px;background:#191512;margin:14px 0 12px}
+.p1 .l{display:flex;gap:8px;align-items:baseline;margin-bottom:9px}
+.p1 .l .w{font-size:13px;color:#3A342D;font-weight:500}
+.p1 .l .d{flex:1;height:1px;background-image:radial-gradient(circle,#8C8377 .8px,transparent .8px);background-size:5px 1px}
+.p1 .l .m{font-family:'JetBrains Mono',monospace;font-size:9px;color:#8C8377}
+
+.p2{background:#0A0C0B}
+.p2 .bar{height:22px;background:#141817;border-bottom:1px solid #202624;display:flex;align-items:center;gap:6px;padding:0 10px;margin:-22px -24px 14px}
+.p2 .bar i{width:7px;height:7px;border-radius:50%;background:#2C3432}
+.p2 .c{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:2.1;direction:ltr;text-align:left;color:#5E6A66}
+.p2 .c .g{color:#B8FF3C}.p2 .c .a{color:#FFB02E}.p2 .c .k{color:#5AD1C8}
+.p2 .m{font-family:'JetBrains Mono',monospace;font-size:11px;color:#B8FF3C;margin-top:8px;letter-spacing:-1px}
+.p2 .m span{color:#3D4644}
+
+.p3{background:#EFEAE0;background-image:linear-gradient(90deg,rgba(13,13,13,.05) 1px,transparent 1px);background-size:26px 26px}
+.p3 .h{display:inline-block;background:#FF4D00;color:#fff;border:2.5px solid #0D0D0D;box-shadow:3px 3px 0 #0D0D0D;padding:3px 10px;font-size:10.5px;font-weight:700;letter-spacing:.1em}
+.p3 .b{background:#fff;border:2.5px solid #0D0D0D;box-shadow:5px 5px 0 #0D0D0D;padding:12px 14px;margin-top:16px}
+.p3 .b .k{font-weight:900;font-size:15px}
+.p3 .b .k mark{background:#FF4D00;color:#fff;padding:0 3px}
+.p3 .b .bd{display:flex;gap:6px;margin-top:9px}
+.p3 .b .bd span{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;border:2px solid #0D0D0D;padding:2px 6px}
+.p3 .b .bd span:first-child{background:#FF4D00;color:#fff}
+.p3 .b2{margin-top:12px;box-shadow:5px 5px 0 #2438FF}
+
+.p4{background:linear-gradient(180deg,#E9E6DE,#D8D4CB)}
+.p4 .scr{background:#12150F;border-radius:5px;padding:12px 14px;box-shadow:inset 0 3px 10px rgba(0,0,0,.85)}
+.p4 .scr .r{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:#4E7A3A;letter-spacing:.1em}
+.p4 .scr .v{font-family:'JetBrains Mono',monospace;font-size:20px;color:#8DFF4F;margin-top:6px;text-shadow:0 0 10px rgba(141,255,79,.5)}
+.p4 .seg{display:flex;gap:4px;margin-top:12px;direction:ltr}
+.p4 .seg i{flex:1;height:9px;background:#24301C}
+.p4 .seg i.on{background:#8DFF4F;box-shadow:0 0 6px rgba(141,255,79,.7)}
+.p4 .led{display:flex;gap:5px;margin-top:12px;direction:ltr}
+.p4 .led i{flex:1;height:18px;background:#F4F2EC;border:1px solid #B4AEA2;display:grid;place-items:center}
+.p4 .led i::after{content:"";width:6px;height:6px;border-radius:50%;background:#4A4740}
+.p4 .led i.on::after{background:#FF5F1F;box-shadow:0 0 6px #FF5F1F}
+
+.p5{background:#FBF8F2}
+.p5 .t{font-family:'Markazi Text',serif;font-size:31px;line-height:1.15;color:#2B2521}
+.p5 .t span{color:#B5654A}
+.p5 .p{font-size:12.5px;color:#7C736A;margin-top:8px;line-height:1.8;font-weight:300}
+.p5 .ch{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.p5 .ch span{border:1px solid #D9D1C4;border-radius:20px;padding:4px 12px;font-size:11.5px;background:#fff}
+.p5 .ch span:nth-child(1){font-size:15px;font-weight:600;border-color:#C9BFB0}
+.p5 .ch span:nth-child(2){font-size:13.5px}
+
+.p6{background:#FAFAFA}
+.p6 .t{font-size:19px;font-weight:700;letter-spacing:-.02em;color:#17171A;text-align:center}
+.p6 .p{font-size:11.5px;color:#6E6E76;margin-top:5px;text-align:center}
+.p6 .inp{margin-top:14px;display:flex;gap:8px}
+.p6 .inp .f{flex:1;height:34px;background:#fff;border:1px solid #E9E9EC;border-radius:10px}
+.p6 .inp .b{width:74px;height:34px;background:#17171A;border-radius:10px}
+.p6 .sg{display:flex;gap:4px;margin-top:10px;background:#F1F1F3;border:1px solid #E9E9EC;border-radius:9px;padding:4px}
+.p6 .sg i{flex:1;height:24px;border-radius:6px;background:transparent}
+.p6 .sg i:first-child{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+.p7{background:#0C0D0F}
+.p7 .t{font-size:19px;font-weight:700;letter-spacing:-.02em;color:#EDEEF0;text-align:center}
+.p7 .p{font-size:11.5px;color:#9A9DA4;margin-top:5px;text-align:center}
+.p7 .inp{margin-top:14px;display:flex;gap:8px}
+.p7 .inp .f{flex:1;height:34px;background:#17181C;border:1px solid #232529;border-radius:10px}
+.p7 .inp .b{width:74px;height:34px;background:#EDEEF0;border-radius:10px}
+.p7 .sg{display:flex;gap:4px;margin-top:10px;background:#1C1E22;border:1px solid #232529;border-radius:9px;padding:4px}
+.p7 .sg i{flex:1;height:24px;border-radius:6px;background:transparent}
+.p7 .sg i:first-child{background:#131417;border:1px solid #232529}
+
+.card__bd{padding:22px 22px 24px;flex:1;display:flex;flex-direction:column}
+.card__n{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.2em;color:var(--clay);
+  margin-bottom:10px;
+}
+.card__t{font-family:'Markazi Text',serif;font-size:31px;font-weight:600;line-height:1.15}
+.card__c{font-size:15px;color:#4A443D;margin-top:10px;line-height:1.9;flex:1}
+.card__tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.card__tags span{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;
+  border:1px solid var(--line);padding:4px 9px;color:var(--muted);background:var(--paper);
+}
+.card__go{
+  margin-top:18px;font-weight:600;font-size:15px;color:var(--ink);
+  display:flex;align-items:center;gap:9px;
+}
+.card__go i{
+  font-style:normal;width:26px;height:26px;border:1.5px solid var(--ink);border-radius:50%;
+  display:grid;place-items:center;font-size:13px;transition:.2s;
+}
+.card:hover .card__go i{background:var(--ink);color:var(--paper);transform:translateX(-4px)}
+[dir=rtl] .card:hover .card__go i{transform:translateX(-4px)}
+
+.swatches{display:flex;gap:5px;margin-top:14px}
+.swatches i{width:22px;height:22px;border:1px solid rgba(0,0,0,.35);display:block}
+
+.palette-1 i:nth-child(1){background:#F3EDE3}
+.palette-1 i:nth-child(2){background:#191512}
+.palette-1 i:nth-child(3){background:#B0362A}
+.palette-1 i:nth-child(4){background:#1F4E5F}
+.palette-2 i:nth-child(1){background:#0A0C0B}
+.palette-2 i:nth-child(2){background:#B8FF3C}
+.palette-2 i:nth-child(3){background:#FFB02E}
+.palette-2 i:nth-child(4){background:#5AD1C8}
+.palette-3 i:nth-child(1){background:#EFEAE0}
+.palette-3 i:nth-child(2){background:#0D0D0D}
+.palette-3 i:nth-child(3){background:#FF4D00}
+.palette-3 i:nth-child(4){background:#2438FF}
+.palette-4 i:nth-child(1){background:#E9E6DE}
+.palette-4 i:nth-child(2){background:#12150F}
+.palette-4 i:nth-child(3){background:#8DFF4F}
+.palette-4 i:nth-child(4){background:#FF5F1F}
+.palette-5 i:nth-child(1){background:#FBF8F2}
+.palette-5 i:nth-child(2){background:#2B2521}
+.palette-5 i:nth-child(3){background:#B5654A}
+.palette-5 i:nth-child(4){background:#6E7F6B}
+.palette-6 i:nth-child(1){background:#FAFAFA}
+.palette-6 i:nth-child(2){background:#17171A}
+.palette-6 i:nth-child(3){background:#2563EB}
+.palette-6 i:nth-child(4){background:#9A9AA2}
+.palette-7 i:nth-child(1){background:#0C0D0F}
+.palette-7 i:nth-child(2){background:#EDEEF0}
+.palette-7 i:nth-child(3){background:#5B9DFF}
+.palette-7 i:nth-child(4){background:#63666D}
+
+.note{
+  border-top:4px solid var(--ink);padding:34px 0 70px;font-size:15.5px;color:#4A443D;line-height:2.1;
+}
+.note h2{font-family:'Markazi Text',serif;font-size:32px;color:var(--ink);font-weight:600;margin-bottom:14px}
+.note ul{margin:16px 22px 0 0}
+.note li{margin-bottom:9px}
+.note code{
+  font-family:'JetBrains Mono',monospace;font-size:13.5px;background:#fff;
+  border:1px solid var(--line);padding:2px 7px;direction:ltr;display:inline-block;
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hd">
+    <div class="hd__kick">SAMPLE REDESIGNS · نمونه‌های پیشنهادی</div>
+    <h1>هفت جهت برای بازطراحی رابط استخراج‌گر کلمات کلیدی</h1>
+    <p>
+      نسخهٔ فعلی رابط، الگوهای آشنای «گلس‌مورفیسم + گرادیان محو + تیترهای مشکی فشرده» را دارد که
+      امضای عمومی خروجی‌های تولیدشده با مدل‌های زبانی است. پنج نمونهٔ نخست هر کدام با یک
+      <b>ایدهٔ مرکزی متفاوت</b> ساخته شده‌اند تا محصول یک شخصیت بصریِ قابل مالکیت داشته باشد؛
+      دو نمونهٔ آخر اما <b>حداقلِ تغییر</b> نسبت به ساختار اصلی‌اند: همان چیدمان، همان بخش‌ها،
+      فقط تمیزکاریِ مینیمال و مدرن.
+    </p>
+    <div class="hd__meta">
+      <span><b>۷</b> نمونه</span>
+      <span>هر کدام <b>تک‌فایل</b> و مستقل</span>
+      <span><b>RTL / فارسی</b></span>
+      <span>داده‌ها <b>نمونهٔ محلی</b> — بدون سرور</span>
+    </div>
+
+    <div class="warn">
+      <b>نکته:</b> هیچ‌کدام از فایل‌های اصلی پروژه تغییر نکرده‌اند. این‌ها نمونه‌های ایستا هستند؛
+      دکمهٔ «شروع» یک شبیه‌سازی محلی از روند پویش است و داده‌ها از پیش تعریف شده‌اند.
+      برای دیدن، یکی از کارت‌های زیر را باز کنید.
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <a class="card" href="01-editorial.html">
+      <div class="card__bar"><span>01 / EDITORIAL</span><span>-paper &amp; ink-</span></div>
+      <div class="card__prev">
+        <div class="fake p1">
+          <div class="t">از یک واژه، به <i>صد مسیر</i>.</div>
+          <div class="r"></div>
+          <div class="l"><span class="w">لپ‌تاپ گیمینگ</span><span class="d"></span><span class="m">×۴ · L1</span></div>
+          <div class="l"><span class="w">قیمت لپ‌تاپ</span><span class="d"></span><span class="m">×۳ · L1</span></div>
+          <div class="l"><span class="w">لپ‌تاپ مناسب برنامه‌نویسی</span><span class="d"></span><span class="m">×۲ · L3</span></div>
+        </div>
+      </div>
+      <div class="card__bd">
+        <div class="card__n">۰۱ — فهرست</div>
+        <div class="card__t">دفترچهٔ چاپی پژوهش</div>
+        <p class="card__c">
+          کاغذ گرم، مرکب سیاه و یک قرمز اکسیدی. نتایج به‌شکل یک <b>فهرست راهنما</b> با نقطه‌چین
+          ردیف‌به‌ردیف چیده می‌شوند؛ تیترها سریف کلاسیک و شماره‌ها با رقم‌های فارسی. هیچ بلور، هیچ گرادیان.
+        </p>
+        <div class="card__tags"><span>سریف نسخ</span><span>شبکهٔ روزنامه‌ای</span><span>نقطه‌چین راهنما</span><span>§ عناوین بخش</span></div>
+        <div class="swatches palette-1"><i></i><i></i><i></i><i></i></div>
+        <div class="card__go">باز کردن نمونه <i>←</i></div>
+      </div>
+    </a>
+
+    <a class="card" href="02-terminal.html">
+      <div class="card__bar"><span>02 / TERMINAL</span><span>-live feed-</span></div>
+      <div class="card__prev">
+        <div class="fake p2">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <div class="c">
+            <span class="k">$ keyword-extract</span> --seed <span class="a">"لپ‌تاپ"</span><br>
+            <span class="g">ok</span> target "لپ‌تاپ" · hl=fa gl=ir<br>
+            <span class="k">get</span> "لپ‌تاپ " + alpha[2] → ...
+          </div>
+          <div class="m">[████████████<span>░░░░░░░░</span>] 60%</div>
+        </div>
+      </div>
+      <div class="card__bd">
+        <div class="card__n">۰۲ — سیگنال</div>
+        <div class="card__t">کنسول پویش زنده</div>
+        <p class="card__c">
+          ابزار را همان‌طور که هست نشان بده: یک <b>فرمان خط فرمان</b>، یک جریان لاگ زنده با مهر زمانی،
+          مترهای متنی ASCII و خروجی در قالب <code style="font-family:inherit">grep</code>.
+          سبز اسیدی روی ذغالی — نه ماتریکس، بلکه ابزار مهندسی.
+        </p>
+        <div class="card__tags"><span>مونو</span><span>پرامپت CLI</span><span>لاگ زنده</span><span>متر ASCII</span></div>
+        <div class="swatches palette-2"><i></i><i></i><i></i><i></i></div>
+        <div class="card__go">باز کردن نمونه <i>←</i></div>
+      </div>
+    </a>
+
+    <a class="card" href="03-brutalist.html">
+      <div class="card__bar"><span>03 / BRUTALIST</span><span>-hard edges-</span></div>
+      <div class="card__prev">
+        <div class="fake p3">
+          <span class="h">۱۰ لایه · ۲۴ زبان</span>
+          <div class="b">
+            <div class="k">لپ‌تاپ <mark>گیمینگ</mark></div>
+            <div class="bd"><span>×۴ تکرار</span><span>لایه ۱</span></div>
+          </div>
+          <div class="b b2">
+            <div class="k">لپ‌تاپ مناسب دانشجو</div>
+          </div>
+        </div>
+      </div>
+      <div class="card__bd">
+        <div class="card__n">۰۳ — بلوک</div>
+        <div class="card__t">پوستر نئوبروتالیست</div>
+        <p class="card__c">
+          حاشیهٔ سه‌پیکسلی، سایهٔ سخت جابه‌جا، نارنجی ایمنی و آبی الکتریک. تیکر واژه‌ها در بالای صفحه
+          می‌لغزد، دکمه‌ها هنگام فشردن <b>فیزیکی</b> پایین می‌روند و هر نتیجه یک بلوک برچسب‌دار است.
+        </p>
+        <div class="card__tags"><span>حاشیهٔ ضخیم</span><span>سایهٔ سخت</span><span>تیکر</span><span>دکمهٔ مکانیکی</span></div>
+        <div class="swatches palette-3"><i></i><i></i><i></i><i></i></div>
+        <div class="card__go">باز کردن نمونه <i>←</i></div>
+      </div>
+    </a>
+
+    <a class="card" href="04-instrument.html">
+      <div class="card__bar"><span>04 / INSTRUMENT</span><span>-panel &amp; print-</span></div>
+      <div class="card__prev">
+        <div class="fake p4">
+          <div class="scr">
+            <div class="r"><span>STATUS</span><span>LAYER 3/4 · 60%</span></div>
+            <div class="v">لپ‌تاپ▮</div>
+            <div class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="led"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+      <div class="card__bd">
+        <div class="card__n">۰۴ — سوند</div>
+        <div class="card__t">پنلِ یک دستگاه اندازه‌گیری</div>
+        <p class="card__c">
+          کل رابط یک <b>پنل فیزیکی</b> است: پیچ‌های گوشه، پلاک حکاکی‌شده، نمایشگر LCD سبز و
+          نوار <b>ده پلهٔ LED</b> که تعداد لایه‌ها را مستقیم نشان می‌دهد. نتایج روی کاغذ پرفراژ
+          با حاشیه‌های سبز چاپ می‌شوند.
+        </p>
+        <div class="card__tags"><span>رَف دستگاه</span><span>LED لایه‌ها</span><span>LCD</span><span>کاغذ پرفراژ</span></div>
+        <div class="swatches palette-4"><i></i><i></i><i></i><i></i></div>
+        <div class="card__go">باز کردن نمونه <i>←</i></div>
+      </div>
+    </a>
+
+    <a class="card" href="05-folio.html">
+      <div class="card__bar"><span>05 / FOLIO</span><span>-marginalia-</span></div>
+      <div class="card__prev">
+        <div class="fake p5">
+          <div class="t">بنویسید تا <span>پیدا شود</span>.</div>
+          <div class="p">واژهٔ شما آغازِ ماجراست؛ سامانه تا ده پله پیش می‌رود.</div>
+          <div class="ch"><span>لپ‌تاپ گیمینگ ×۴</span><span>قیمت لپ‌تاپ ×۳</span><span>لپ‌تاپ استوک</span></div>
+        </div>
+      </div>
+      <div class="card__bd">
+        <div class="card__n">۰۵ — حاشیه</div>
+        <div class="card__t">حاشیه‌نویسیِ یک پژوهشگر</div>
+        <p class="card__c">
+          زمینهٔ عاجی، سریف نرم و <b>ستون حاشیهٔ چسبان</b> که یادداشت‌های تحلیلی کنار متن می‌ایستند.
+          نتایج یک ابر واژگان‌اند: هرچه بسامد بیشتر، تیتر بزرگ‌تر. آمار به‌شکل فهرست کتاب با نقطه‌چین.
+        </p>
+        <div class="card__tags"><span>حاشیهٔ چسبان</span><span>ابر واژگان</span><span>فهرست کتابی</span><span>نقل‌قول</span></div>
+        <div class="swatches palette-5"><i></i><i></i><i></i><i></i></div>
+        <div class="card__go">باز کردن نمونه <i>←</i></div>
+      </div>
+    </a>
+
+    <a class="card" href="06-clean.html">
+      <div class="card__bar"><span>06 / CLEAN</span><span>-minimal light-</span></div>
+      <div class="card__prev">
+        <div class="fake p6">
+          <div class="t">کلمات کلیدیِ پیشنهادی گوگل</div>
+          <div class="p">یک واژه وارد کنید؛ سامانه لایه‌به‌لایه جمع‌آوری می‌کند.</div>
+          <div class="inp"><span class="f"></span><span class="b"></span></div>
+          <div class="sg"><i></i><i></i></div>
+        </div>
+      </div>
+      <div class="card__bd">
+        <div class="card__n">۰۶ — تمیز</div>
+        <div class="card__t">مینیمال روشن، کمینهٔ تغییر</div>
+        <p class="card__c">
+          همان ساختار نسخهٔ اصلی — هدر، کارت جستجو، سوییچ‌ها، اسلایدر لایه، نتایج و سایدبار —
+          با کمترین دست‌کاری: حذف بلور و گرادیان، شعاع یکنواخت ۱۲ پیکسل، وزن تایپ منظم،
+          حذف <code style="font-family:inherit">tracking</code> از فارسی و رنگ‌های خنثی با یک تأکید آبی.
+        </p>
+        <div class="card__tags"><span>همان چیدمان</span><span>بدون بلور</span><span>شعاع ۱۲</span><span>رنگ خنثی</span></div>
+        <div class="swatches palette-6"><i></i><i></i><i></i><i></i></div>
+        <div class="card__go">باز کردن نمونه <i>←</i></div>
+      </div>
+    </a>
+
+    <a class="card" href="07-dark.html">
+      <div class="card__bar"><span>07 / DARK</span><span>-minimal dark-</span></div>
+      <div class="card__prev">
+        <div class="fake p7">
+          <div class="t">کلمات کلیدیِ پیشنهادی گوگل</div>
+          <div class="p">یک واژه وارد کنید؛ سامانه لایه‌به‌لایه جمع‌آوری می‌کند.</div>
+          <div class="inp"><span class="f"></span><span class="b"></span></div>
+          <div class="sg"><i></i><i></i></div>
+        </div>
+      </div>
+      <div class="card__bd">
+        <div class="card__n">۰۷ — تاریک</div>
+        <div class="card__t">مینیمال تاریک، کمینهٔ تغییر</div>
+        <p class="card__c">
+          همان نمونهٔ ۰۶ با پوستهٔ تاریک: زمینهٔ ذغالی، کارت‌های کمی روشن‌تر، خطوط hairline،
+          دکمهٔ روشنِ معکوس و یک آبی برای تأکید. ساختار، بخش‌ها و رفتار کاملاً مشابه اصلی است؛
+          فقط پالت عوض شده.
+        </p>
+        <div class="card__tags"><span>پوستهٔ تاریک</span><span>hairline</span><span>دکمهٔ معکوس</span><span>کمینهٔ تغییر</span></div>
+        <div class="swatches palette-7"><i></i><i></i><i></i><i></i></div>
+        <div class="card__go">باز کردن نمونه <i>←</i></div>
+      </div>
+    </a>
+
+  </div>
+
+  <section class="note">
+    <h2>چرا نسخهٔ فعلی «وایب‌کدینگ» به نظر می‌رسد؟</h2>
+    <ul>
+      <li><b>بلور و کارت شیشه‌ای</b> — <code>backdrop-filter</code> با حباب‌های گرادیانی گوشه‌ها، تکرارشونده‌ترین امضای خروجی مدل‌هاست.</li>
+      <li><b>گوشه‌های غول‌پیکر یکنواخت</b> — <code>rounded-[2.5rem]</code> روی همه‌چیز، بدون سلسله‌مراتب شکلی.</li>
+      <li><b>همه‌چیز فریاد می‌زند</b> — <code>font-black</code> + <code>uppercase</code> + <code>tracking-widest</code> روی هر برچسب، مقیاس تایپوگرافیک وجود ندارد.</li>
+      <li><b>متن ریزتر از حد خوانا</b> — کلاس‌های <code>text-[8px]</code> و <code>text-[9px]</code> هم از نظر دسترس‌پذیری مشکل‌سازند هم در فارسی.</li>
+      <li><b>tracking روی متن عربی/فارسی</b> — فاصله‌گذاری حروف، اتصالِ نستعلیق را خراب می‌کند؛ در نمونه‌های بالا حذف شده.</li>
+      <li><b>سه کارت ویژگی یکسان</b> + آیکون در مربع رنگی + عنوان + پاراگراف، الگوی کلاسیک خروجی مدل‌هاست.</li>
+      <li><b>حرکت بی‌هدف</b> — <code>animate-bounce</code> روی عدد، <code>animate-pulse</code> روی متن، <code>hover:-translate-y-2</code> روی همه‌جا.</li>
+      <li><b>پالت مالکیت‌ناپذیر</b> — آبی <code>#0D47A1</code> و فیروزه‌ای <code>#00BCD4</code> با پالت پیش‌فرض Tailwind ترکیب شده‌اند.</li>
+    </ul>
+    <p style="margin-top:22px">
+      پنج نمونهٔ نخست سعی کرده‌اند این عادت‌ها را کنار بگذارند و در عوض <b>یک مفهوم</b> داشته باشند:
+      دفترچهٔ چاپی، کنسول، پوستر، دستگاه، حاشیه‌نویسی. دو نمونهٔ آخر (۰۶ و ۰۷) اما مسیر دیگری دارند:
+      <b>همان ساختار اصلی را نگه می‌دارند</b> و فقط آن را از شعارهای وایب‌کدینگ پاک می‌کنند —
+      اگر تغییر باید کم باشد، این دو نقطهٔ شروع‌اند. انتخاب یکی از این مسیرها و ادامهٔ آن
+      در سراسر محصول، چیزی است که رابط را از «یک صفحهٔ عمومی» به «یک محصولِ قابل تشخیص» تبدیل می‌کند.
+    </p>
+  </section>
+</div>
+
+</body>
+</html>
