@@ -54,6 +54,63 @@
         .animate-fade-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
+        /* Extraction pipeline animation */
+        @keyframes orbitSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes orbitSpinReverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        @keyframes flowDash {
+            to { stroke-dashoffset: -28; }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(13,71,161,0.25), 0 0 24px rgba(0,188,212,0.25); }
+            50% { box-shadow: 0 0 0 10px rgba(13,71,161,0), 0 0 42px rgba(0,188,212,0.45); }
+        }
+        @keyframes shimmerSlide {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(250%); }
+        }
+        @keyframes logIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.6); }
+            70% { opacity: 1; transform: scale(1.08); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .extract-orbit { animation: orbitSpin 7s linear infinite; }
+        .extract-orbit-rev { animation: orbitSpinReverse 11s linear infinite; }
+        .extract-flow { stroke-dasharray: 6 8; animation: flowDash 1.1s linear infinite; }
+        .extract-core { animation: pulseGlow 2.2s ease-in-out infinite; }
+        .extract-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 40%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+            animation: shimmerSlide 1.6s ease-in-out infinite;
+        }
+        .extract-log-item { animation: logIn 0.35s ease-out forwards; }
+        .extract-pop { animation: popIn 0.4s ease-out forwards; }
+        .stage-dot { transition: all 0.4s ease; }
+        .stage-active .stage-dot {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(13,71,161,0.12), 0 0 16px rgba(13,71,161,0.35);
+        }
+        .stage-done .stage-dot {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+        .stage-active .stage-label { color: #0f172a; }
+        .stage-done .stage-label { color: #059669; }
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -367,26 +424,64 @@
             </div>
         </div>
 
-        <!-- وضعیت بارگذاری ساده -->
-        <div id="loadingState" class="hidden my-10 md:my-16 flex-col items-center justify-center gap-4 md:gap-6 animate-fade-in">
-            <div class="relative">
-                <div class="w-12 h-12 md:w-16 md:h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <i class="fa-solid fa-magnifying-glass text-primary text-sm md:text-base animate-pulse"></i>
+        <!-- وضعیت بارگذاری ساده (حالت استاندارد با انیمیشن زنده) -->
+        <div id="loadingState" class="hidden my-6 md:my-10 glass rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 shadow-soft max-w-2xl mx-auto border-2 border-primary/5 animate-fade-in relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-40 h-40 bg-secondary/5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
+            <div class="flex items-center gap-3 md:gap-4 mb-5 relative z-10">
+                <div class="relative w-16 h-16 md:w-20 md:h-20 shrink-0">
+                    <div class="extract-core absolute inset-2 rounded-full bg-gradient-to-br from-[#0D47A1] to-[#00BCD4] flex items-center justify-center text-white text-lg md:text-xl">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <svg class="extract-orbit absolute inset-0 w-full h-full" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="47" stroke="rgba(13,71,161,0.35)" stroke-width="2.5" class="extract-flow"/>
+                        <circle cx="50" cy="3" r="5" fill="#0D47A1"/>
+                    </svg>
+                    <svg class="extract-orbit-rev absolute inset-0 w-full h-full" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="36" stroke="rgba(0,188,212,0.4)" stroke-width="2" stroke-dasharray="4 6"/>
+                        <circle cx="86" cy="50" r="4" fill="#00BCD4"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h4 class="font-black text-slate-900 text-xs md:text-sm uppercase tracking-tight">{{ __('messages.extract_pipeline_title') }}</h4>
+                    <p class="text-[8px] md:text-[10px] text-secondary mt-0.5 font-black uppercase tracking-widest animate-pulse">{{ __('messages.loading_text') }}</p>
+                </div>
+                <div class="ms-auto flex items-center gap-2 shrink-0">
+                    <span class="text-[9px] md:text-[11px] font-black text-slate-500">{{ __('messages.discovered_keywords') }}:</span>
+                    <span id="normalDiscoveredCount" class="text-sm md:text-lg font-black text-secondary extract-pop">0</span>
                 </div>
             </div>
-            <p class="text-slate-500 font-black text-[10px] md:text-sm uppercase tracking-widest animate-pulse">{{ __('messages.loading_text') }}</p>
+            <div class="mb-4 bg-white/60 border border-slate-100 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between shadow-inner relative z-10">
+                <span class="text-[8px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest shrink-0">{{ __('messages.current_query') }}</span>
+                <span id="normalQueryText" class="text-xs md:text-sm font-black text-primary animate-pulse truncate ml-2">{{ __('messages.waiting_start') }}</span>
+            </div>
+            <div class="relative w-full bg-slate-100 h-1.5 md:h-2 rounded-full overflow-hidden mb-4 shadow-inner extract-shimmer">
+                <div class="bg-gradient-to-l from-[#0D47A1] to-[#00BCD4] h-full rounded-full" style="width: 30%; animation: shimmerSlide 1.6s ease-in-out infinite;"></div>
+            </div>
+            <div class="flex items-center gap-2 mb-3 relative z-10">
+                <span class="text-[8px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest">{{ __('messages.phase_requests') }}:</span>
+                <span id="normalRequestCount" class="text-xs md:text-sm font-black text-slate-900">0 / 0</span>
+            </div>
+            <div class="bg-slate-50/70 border border-slate-100 rounded-xl md:rounded-2xl p-3 md:p-4 relative z-10">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-satellite-dish text-secondary text-xs"></i>
+                    <span class="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">{{ __('messages.extract_feed_title') }}</span>
+                </div>
+                <ul id="normalFeed" class="space-y-1.5 max-h-32 overflow-y-auto text-[10px] md:text-[11px] font-bold text-slate-600"></ul>
+            </div>
         </div>
 
-        <!-- باکس مانیتورینگ فرآیند -->
-        <div id="bulkProgressState" class="hidden my-6 md:my-10 glass rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 shadow-soft max-w-2xl mx-auto border-2 border-primary/5 animate-fade-in">
-            <div class="flex items-center justify-between mb-6 md:mb-8">
+        <!-- باکس مانیتورینگ فرآیند (حالت عمیق با پایپ‌لاین مرحله‌ای) -->
+        <div id="bulkProgressState" class="hidden my-6 md:my-10 glass rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 shadow-soft max-w-2xl mx-auto border-2 border-primary/5 animate-fade-in relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none"></div>
+            <div class="flex items-center justify-between mb-5 md:mb-6 relative z-10">
                 <div class="flex items-center gap-3 md:gap-4">
                     <div class="w-10 h-10 md:w-12 md:h-12 bg-primary/10 text-primary rounded-xl md:rounded-2xl flex items-center justify-center shadow-inner">
                         <i class="fa-solid fa-gear text-lg md:text-xl animate-spin" style="animation-duration: 3s"></i>
                     </div>
                     <div>
-                        <h4 class="font-black text-slate-900 text-xs md:text-sm uppercase tracking-tight">{{ __('messages.bulk_active') }}</h4>
+                        <h4 class="font-black text-slate-900 text-xs md:text-sm uppercase tracking-tight">{{ __('messages.bulk_active') }} · {{ __('messages.extract_pipeline_title') }}</h4>
                         <p id="currentPhaseLabel" class="text-[8px] md:text-[10px] text-secondary mt-0.5 md:mt-1 font-black uppercase tracking-widest">{{ __('messages.phase1_label') }}</p>
                     </div>
                 </div>
@@ -396,20 +491,66 @@
                 </button>
             </div>
 
-            <div class="mb-5 md:mb-6 bg-white/50 border border-slate-100 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between shadow-inner">
+            <!-- پایپ‌لاین بصری: اوربیت + مراحل -->
+            <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 md:gap-6 items-center mb-5 md:mb-6 bg-white/50 border border-slate-100 rounded-2xl p-4 md:p-5 shadow-inner relative z-10">
+                <div class="relative w-28 h-28 md:w-36 md:h-36 mx-auto shrink-0">
+                    <div class="extract-core absolute inset-3 rounded-full bg-gradient-to-br from-[#0D47A1] via-[#1565C0] to-[#00BCD4] flex items-center justify-center text-white text-xl md:text-2xl">
+                        <i class="fa-solid fa-bolt-lightning"></i>
+                    </div>
+                    <svg class="extract-orbit absolute inset-0 w-full h-full" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="47" stroke="rgba(13,71,161,0.35)" stroke-width="2.5" class="extract-flow"/>
+                        <circle cx="50" cy="3" r="5.5" fill="#0D47A1"/>
+                        <circle cx="50" cy="3" r="2.2" fill="#fff"/>
+                    </svg>
+                    <svg class="extract-orbit-rev absolute inset-0 w-full h-full" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="35" stroke="rgba(0,188,212,0.45)" stroke-width="2" stroke-dasharray="4 6"/>
+                        <circle cx="85" cy="50" r="4.5" fill="#00BCD4"/>
+                        <circle cx="85" cy="50" r="1.8" fill="#fff"/>
+                    </svg>
+                    <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] md:text-[9px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shadow-lg">GOOGLE LIVE</div>
+                </div>
+                <div id="extractStages" class="flex flex-col gap-2">
+                    <div class="stage-item flex items-center gap-2.5" data-stage="0">
+                        <span class="stage-dot w-7 h-7 md:w-8 md:h-8 rounded-xl border-2 border-slate-200 bg-white text-slate-400 flex items-center justify-center text-[11px] md:text-xs font-black shrink-0"><i class="fa-solid fa-seedling"></i></span>
+                        <span class="stage-label text-[10px] md:text-xs font-black text-slate-400">{{ __('messages.extract_stage_expand') }}</span>
+                    </div>
+                    <div class="stage-item flex items-center gap-2.5" data-stage="1">
+                        <span class="stage-dot w-7 h-7 md:w-8 md:h-8 rounded-xl border-2 border-slate-200 bg-white text-slate-400 flex items-center justify-center text-[11px] md:text-xs font-black shrink-0"><i class="fa-solid fa-arrow-down-a-z"></i></span>
+                        <span class="stage-label text-[10px] md:text-xs font-black text-slate-400">{{ __('messages.extract_stage_alphabet') }}</span>
+                    </div>
+                    <div class="stage-item flex items-center gap-2.5" data-stage="2">
+                        <span class="stage-dot w-7 h-7 md:w-8 md:h-8 rounded-xl border-2 border-slate-200 bg-white text-slate-400 flex items-center justify-center text-[11px] md:text-xs font-black shrink-0"><i class="fa-solid fa-layer-group"></i></span>
+                        <span class="stage-label text-[10px] md:text-xs font-black text-slate-400">{{ __('messages.extract_stage_deep') }}</span>
+                    </div>
+                    <div class="stage-item flex items-center gap-2.5" data-stage="3">
+                        <span class="stage-dot w-7 h-7 md:w-8 md:h-8 rounded-xl border-2 border-slate-200 bg-white text-slate-400 flex items-center justify-center text-[11px] md:text-xs font-black shrink-0"><i class="fa-solid fa-filter"></i></span>
+                        <span class="stage-label text-[10px] md:text-xs font-black text-slate-400">{{ __('messages.extract_stage_refine') }}</span>
+                    </div>
+                    <div class="stage-item flex items-center gap-2.5" data-stage="4">
+                        <span class="stage-dot w-7 h-7 md:w-8 md:h-8 rounded-xl border-2 border-slate-200 bg-white text-slate-400 flex items-center justify-center text-[11px] md:text-xs font-black shrink-0"><i class="fa-solid fa-chart-line"></i></span>
+                        <span class="stage-label text-[10px] md:text-xs font-black text-slate-400">{{ __('messages.extract_stage_output') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 bg-white/50 border border-slate-100 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between shadow-inner relative z-10">
                 <span class="text-[8px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest shrink-0">{{ __('messages.current_query') }}</span>
                 <span id="currentQueryText" class="text-xs md:text-sm font-black text-primary animate-pulse truncate ml-2">{{ __('messages.waiting_start') }}</span>
             </div>
+            <div class="mb-5 flex items-center gap-2 bg-emerald-50/60 border border-emerald-100 rounded-xl px-3 py-2 relative z-10">
+                <i class="fa-solid fa-sparkles text-emerald-500 text-[10px]"></i>
+                <span id="extractLastKw" class="text-[10px] md:text-[11px] font-black text-emerald-700 truncate">{{ __('messages.waiting_start') }}</span>
+            </div>
 
-            <div class="mb-2 md:mb-3 flex justify-between text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <div class="mb-2 md:mb-3 flex justify-between text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">
                 <span id="progressStepTitleText">{{ __('messages.phase_progress') }}</span>
                 <span id="phasePercentText" class="text-primary">0%</span>
             </div>
-            <div class="w-full bg-slate-100 h-1.5 md:h-2 rounded-full overflow-hidden mb-6 md:mb-8 shadow-inner">
-                <div id="progressBar" class="bg-primary h-full transition-all duration-500 shadow-[0_0_15px_rgba(13,71,161,0.5)]" style="width: 0%"></div>
+            <div class="w-full bg-slate-100 h-1.5 md:h-2 rounded-full overflow-hidden mb-6 md:mb-8 shadow-inner relative extract-shimmer">
+                <div id="progressBar" class="bg-gradient-to-l from-[#0D47A1] to-[#00BCD4] h-full transition-all duration-500 shadow-[0_0_15px_rgba(13,71,161,0.5)] relative" style="width: 0%"></div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-6 relative z-10">
                 <div class="glass bg-white/30 p-3 md:p-5 rounded-[1rem] md:rounded-[1.5rem] border border-slate-100 text-center shadow-sm">
                     <span class="block text-[8px] md:text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1 md:mb-2">{{ __('messages.phase_requests') }}</span>
                     <span id="progressCount" class="text-sm md:text-lg font-black text-slate-900">0 / 0</span>
@@ -423,6 +564,14 @@
                     <span class="block text-[8px] md:text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1 md:mb-2 relative z-10">{{ __('messages.discovered_keywords') }}</span>
                     <span id="discoveredCount" class="text-sm md:text-lg font-black text-secondary relative z-10 animate-bounce">0</span>
                 </div>
+            </div>
+
+            <div class="mt-4 md:mt-5 bg-slate-50/70 border border-slate-100 rounded-xl md:rounded-2xl p-3 md:p-4 relative z-10">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-satellite-dish text-secondary text-xs"></i>
+                    <span class="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">{{ __('messages.extract_feed_title') }}</span>
+                </div>
+                <ul id="extractFeed" class="space-y-1.5 max-h-36 overflow-y-auto text-[10px] md:text-[11px] font-bold text-slate-600"></ul>
             </div>
         </div>
 
@@ -669,7 +818,7 @@
         <div class="max-w-6xl mx-auto px-4 text-center relative z-10">
             <div class="flex items-center justify-center gap-3 md:gap-4 mb-4 md:mb-6">
                 <div class="h-px bg-slate-200 flex-grow max-w-[60px] md:max-w-[100px]"></div>
-                <a href="https://zarwan.co" target="_blank" class="flex items-center gap-2 text-slate-900 hover:text-primary transition-all group">
+                <a href="https://barivan.com" target="_blank" class="flex items-center gap-2 text-slate-900 hover:text-primary transition-all group">
                     <span class="text-[10px] md:text-xs font-black uppercase tracking-widest">{{ __('messages.made_by') }}</span>
                     <i class="fa-solid fa-arrow-up-right-from-square text-[8px] md:text-[10px] opacity-0 group-hover:opacity-100 transform -translate-y-1 group-hover:translate-y-0 transition-all"></i>
                 </a>
@@ -697,6 +846,10 @@
         const progressCount = document.getElementById('progressCount');
         const activeLayerText = document.getElementById('activeLayerText');
         const discoveredCount = document.getElementById('discoveredCount');
+        const extractLastKw = document.getElementById('extractLastKw');
+        const normalQueryText = document.getElementById('normalQueryText');
+        const normalRequestCount = document.getElementById('normalRequestCount');
+        const normalDiscoveredCount = document.getElementById('normalDiscoveredCount');
         const introState = document.getElementById('introState');
         const errorState = document.getElementById('errorState');
         const retryBtn = document.getElementById('retryBtn');
@@ -758,8 +911,55 @@
             no_selection: "{{ __('messages.no_selection') }}",
             copied_success: "{{ app()->getLocale() == 'en' ? 'Copied to clipboard!' : (app()->getLocale() == 'fa' ? 'در حافظه کپی شد!' : 'تم النسخ إلى الحافظة!') }}",
             stop_msg: "{{ app()->getLocale() == 'en' ? 'Operation stopped. Gathering results...' : (app()->getLocale() == 'fa' ? 'عملیات متوقف شد. در حال تجمیع نتایج...' : 'توقفت العملية. جاري جمع النتائج...') }}",
-            new_discoveries_none: "{{ app()->getLocale() == 'en' ? 'No new words found in this layer.' : (app()->getLocale() == 'fa' ? 'کلمه جدیدی در این لایه یافت نشد.' : 'لم يتم العثور على كلمات جديدة في هذه الطبقة.') }}"
+            new_discoveries_none: "{{ app()->getLocale() == 'en' ? 'No new words found in this layer.' : (app()->getLocale() == 'fa' ? 'کلمه جدیدی در این لایه یافت نشد.' : 'لم يتم العثور على كلمات جديدة في هذه الطبقة.') }}",
+            log_scan: "{{ __('messages.extract_log_scan', ['q' => 'Q']) }}",
+            log_hit: "{{ __('messages.extract_log_hit', ['n' => 'N', 'q' => 'Q']) }}",
+            log_layer: "{{ __('messages.extract_log_layer', ['n' => 'N']) }}"
         };
+
+        // ---------- Extraction theater helpers (progress animation) ----------
+        function setExtractStage(idx, doneUpTo) {
+            document.querySelectorAll('#extractStages .stage-item').forEach(el => {
+                const i = parseInt(el.getAttribute('data-stage'), 10);
+                el.classList.remove('stage-active', 'stage-done');
+                const dot = el.querySelector('.stage-dot');
+                if (dot && dot.dataset.orig === undefined) dot.dataset.orig = dot.innerHTML;
+                if (i < idx || (doneUpTo !== undefined && i <= doneUpTo && i < idx)) {
+                    el.classList.add('stage-done');
+                    if (dot) dot.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else if (i === idx) {
+                    el.classList.add('stage-active');
+                    if (dot && dot.dataset.orig) dot.innerHTML = dot.dataset.orig;
+                } else {
+                    if (dot && dot.dataset.orig) dot.innerHTML = dot.dataset.orig;
+                }
+            });
+        }
+        function resetExtractStages() {
+            document.querySelectorAll('#extractStages .stage-item').forEach(el => {
+                el.classList.remove('stage-active', 'stage-done');
+                const dot = el.querySelector('.stage-dot');
+                if (dot && dot.dataset.orig) dot.innerHTML = dot.dataset.orig;
+            });
+            const first = document.querySelector('#extractStages .stage-item[data-stage="0"]');
+            if (first) first.classList.add('stage-active');
+        }
+        function pushExtractLog(listId, html, icon) {
+            const box = document.getElementById(listId);
+            if (!box) return;
+            const li = document.createElement('li');
+            li.className = "extract-log-item flex items-center gap-2 bg-white/80 border border-slate-100 rounded-lg px-2.5 py-1.5 shadow-sm";
+            const safeIcon = icon || '<i class="fa-solid fa-circle-notch fa-spin text-primary text-[9px]"></i>';
+            li.innerHTML = safeIcon + '<span class="truncate">' + html.replace(/</g, '&lt;') + '</span>';
+            box.prepend(li);
+            while (box.children.length > 7) box.removeChild(box.lastChild);
+        }
+        function clearExtractLogs() {
+            ['extractFeed', 'normalFeed'].forEach(id => {
+                const box = document.getElementById(id);
+                if (box) box.innerHTML = '';
+            });
+        }
 
         // UI Helpers
         function setSearchType(type) {
@@ -1193,14 +1393,25 @@
                 loadingState.classList.remove('hidden');
                 bulkProgressState.classList.add('hidden');
                 slowScrollTo(loadingState);
+                clearExtractLogs();
+                if (normalQueryText) normalQueryText.textContent = I18N.loading_start;
+                if (normalRequestCount) normalRequestCount.textContent = '0 / 0';
+                if (normalDiscoveredCount) normalDiscoveredCount.textContent = '0';
 
                 try {
                     const seen = new Map();
+                    let nProcessed = 0;
+                    let nTotal = 0;
+                    seeds.forEach(seed => { nTotal += buildSeedQueries(seed, lang).length; });
+                    if (normalRequestCount) normalRequestCount.textContent = `0 / ${nTotal}`;
                     for (const seed of seeds) {
-                        currentQueryText.textContent = seed;
+                        if (normalQueryText) normalQueryText.textContent = seed;
                         const queries = buildSeedQueries(seed, lang);
                         for (const q of queries) {
+                            if (normalQueryText) normalQueryText.textContent = q;
+                            pushExtractLog('normalFeed', I18N.log_scan.replace('Q', q));
                             const data = await fetchSingleSuggestion(q, lang, country);
+                            let fresh = 0;
                             data.forEach(item => {
                                 if (isExcludedKeyword(item, negativeTerms)) return;
                                 const key = normalizeKeywordClient(item);
@@ -1209,8 +1420,18 @@
                                     seen.get(key).count++;
                                 } else {
                                     seen.set(key, { keyword: item.trim(), count: 1, firstLayer: 1 });
+                                    fresh++;
                                 }
                             });
+                            nProcessed++;
+                            if (normalRequestCount) normalRequestCount.textContent = `${nProcessed} / ${nTotal}`;
+                            if (normalDiscoveredCount) {
+                                normalDiscoveredCount.textContent = seen.size;
+                                normalDiscoveredCount.classList.remove('extract-pop');
+                                void normalDiscoveredCount.offsetWidth;
+                                normalDiscoveredCount.classList.add('extract-pop');
+                            }
+                            if (fresh > 0) pushExtractLog('normalFeed', I18N.log_hit.replace('N', fresh).replace('Q', q), '<i class="fa-solid fa-plus text-emerald-500 text-[9px]"></i>');
                             if (isBulkCancelled) break;
                         }
                         if (isBulkCancelled) break;
@@ -1259,6 +1480,10 @@
                 }
             }
 
+            clearExtractLogs();
+            resetExtractStages();
+            setExtractStage(0);
+            if (extractLastKw) extractLastKw.textContent = I18N.loading_start;
             currentPhaseLabel.textContent = I18N.phase1_label;
             activeLayerText.textContent = I18N.layer_unit.replace('CURRENT', 1).replace('TOTAL', targetTotalLayers);
             discoveredCount.textContent = '0';
@@ -1288,10 +1513,15 @@
                     visitedQueries.add(targetQuery);
 
                     try {
+                        if (p1Processed < 2) pushExtractLog('extractFeed', I18N.log_scan.replace('Q', targetQuery));
                         const suggestions = await fetchSingleSuggestion(targetQuery, lang, country);
+                        const before = keywordRegistry.size;
                         suggestions.forEach(item => {
                             registerKeyword(item, 1);
                         });
+                        const gained = keywordRegistry.size - before;
+                        if (p1Processed < 2 || gained > 0) pushExtractLog('extractFeed', I18N.log_hit.replace('N', gained).replace('Q', targetQuery), gained > 0 ? '<i class="fa-solid fa-plus text-emerald-500 text-[9px]"></i>' : undefined);
+                        if (gained > 0 && suggestions[0] && extractLastKw) extractLastKw.textContent = suggestions[0];
                     } catch (e) {}
 
                     p1Processed++;
@@ -1300,9 +1530,11 @@
                     phasePercentText.textContent = `${percent}%`;
                     progressCount.textContent = `${p1Processed} / ${p1Total}`;
                     discoveredCount.textContent = keywordRegistry.size;
+                    if (percent >= 50) setExtractStage(1);
 
                     if (requestDelay > 0) await sleep(requestDelay);
                 }
+                setExtractStage(2);
 
                 let previousLayerNewDiscoveries = Array.from(keywordRegistry.entries())
                     .filter(([_, meta]) => meta.firstLayer === 1)
@@ -1321,6 +1553,8 @@
                         break;
                     }
 
+                    pushExtractLog('extractFeed', I18N.log_layer.replace('N', currentLayer), '<i class="fa-solid fa-layer-group text-violet-500 text-[9px]"></i>');
+                    setExtractStage(2);
                     currentPhaseLabel.textContent = I18N.phase2_label.replace('LAYER', currentLayer);
                     activeLayerText.textContent = I18N.layer_unit.replace('CURRENT', currentLayer).replace('TOTAL', targetTotalLayers);
                     progressBar.style.width = `0%`;
@@ -1340,6 +1574,7 @@
 
                         try {
                             const suggestions = await fetchSingleSuggestion(targetQuery, lang, country);
+                            const beforeDeep = keywordRegistry.size;
                             suggestions.forEach(item => {
                                 const trimmedItem = item.trim();
                                 if (trimmedItem && !isExcludedKeyword(trimmedItem, negativeTerms)) {
@@ -1350,6 +1585,11 @@
                                     registerKeyword(trimmedItem, currentLayer);
                                 }
                             });
+                            const gainedDeep = keywordRegistry.size - beforeDeep;
+                            if (gainedDeep > 0) {
+                                pushExtractLog('extractFeed', I18N.log_hit.replace('N', gainedDeep).replace('Q', targetQuery), '<i class="fa-solid fa-plus text-emerald-500 text-[9px]"></i>');
+                                if (suggestions[0] && extractLastKw) extractLastKw.textContent = suggestions[0];
+                            }
                         } catch (e) {}
 
                         pCurrentProcessed++;
@@ -1378,6 +1618,10 @@
                     return a.keyword.localeCompare(b.keyword, lang === 'en' ? 'en' : 'fa');
                 });
 
+                setExtractStage(3);
+                await sleep(350);
+                setExtractStage(4);
+                await sleep(350);
                 bulkProgressState.classList.add('hidden');
                 pushHistory(seeds, lang, country, finalResultsArray.length);
                 processAndDisplayResults(seeds.join('، '), finalResultsArray, lang);
